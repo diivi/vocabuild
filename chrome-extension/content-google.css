@@ -1,0 +1,41 @@
+#vocabuild-badge {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999999;
+  animation: vocabuild-slide-in 0.3s ease-out;
+}
+
+#vocabuild-badge.vocabuild-badge-hide {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease-in;
+}
+
+.vocabuild-badge-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #6366f1;
+  color: white;
+  border-radius: 12px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.vocabuild-badge-inner strong {
+  font-weight: 600;
+}
+
+@keyframes vocabuild-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

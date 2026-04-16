@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 280px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #fafafa;
+      color: #1a1a2e;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .header svg { flex-shrink: 0; }
+    .header h1 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .header h1 span { color: #6366f1; }
+    .content { padding: 16px; }
+    .stat {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #6366f1;
+    }
+    .word-list {
+      margin-top: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .word-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .word-item:last-child { border-bottom: none; }
+    .word-name { font-weight: 500; }
+    .word-time { font-size: 11px; color: #9ca3af; }
+    .empty {
+      text-align: center;
+      padding: 24px 0;
+      color: #9ca3af;
+      font-size: 13px;
+    }
+    .footer {
+      padding: 12px 16px;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+    }
+    .footer a {
+      color: #6366f1;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .footer a:hover { text-decoration: underline; }
+    .hint {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <svg width="24" height="24" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="8" fill="#6366f1"/>
+      <text x="16" y="23" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="20" fill="white">V</text>
+    </svg>
+    <h1>Voca<span>Build</span></h1>
+  </div>
+  <div class="content">
+    <div class="stat">
+      <span class="stat-label">Pending words</span>
+      <span class="stat-value" id="count">0</span>
+    </div>
+    <div class="word-list" id="word-list"></div>
+    <div class="empty" id="empty" style="display:none">
+      No words captured yet.<br>
+      Search for a word on Google to get started.
+    </div>
+    <p class="hint">
+      Words are synced automatically when you open VocaBuild.
+    </p>
+  </div>
+  <div class="footer">
+    <a href="https://vocabuild.vercel.app" target="_blank">Open VocaBuild</a>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
