@@ -96,6 +96,8 @@ pnpm dev
 2. Create a new shortcut: **Receive Text from Share Sheet** -> **URL** (`https://vocabuild.vercel.app/?add=Shortcut Input`) -> **Open URLs**
 3. Name it "Add to VocaBuild" and enable "Show in Share Sheet"
 
+![shortcut](img/shortcut.PNG)
+
 ## Tech Stack
 
 React + TypeScript, Tailwind CSS + shadcn/ui, Dexie.js (IndexedDB), Vite, vite-plugin-pwa. APIs: Free Dictionary API, Datamuse, Gemini (optional). Hosted on Vercel.

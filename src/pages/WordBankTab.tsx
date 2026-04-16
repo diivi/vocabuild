@@ -111,7 +111,12 @@ export function WordBankTab() {
             return (
               <div
                 key={word.id}
-                onClick={() => setExpandedId(null)}
+                onClick={(e) => {
+                  // Don't collapse if clicking interactive elements (buttons, badges)
+                  const target = e.target as HTMLElement;
+                  if (target.closest("button, [role='button'], .badge")) return;
+                  setExpandedId(null);
+                }}
                 className="cursor-pointer"
               >
                 <WordCard word={word} />
