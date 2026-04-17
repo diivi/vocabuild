@@ -66,19 +66,33 @@ export async function importData(json: string): Promise<number> {
       // Restore Date objects (JSON serializes them as strings)
       rest.searchedAt = new Date(rest.searchedAt);
       if (rest.lastReviewedAt) rest.lastReviewedAt = new Date(rest.lastReviewedAt);
+      // Backward-compat: data exported before the inBank field was added won't
+      // have it. Treat every imported word as belonging to the bank.
+      if ((rest as Partial<Word>).inBank === undefined) {
+        (rest as Partial<Word>).inBank = 1;
+      }
       await db.words.add(rest as Word);
       added++;
     } else if (existing.id) {
       // Merge: keep the one with more reviews
       const totalExisting = existing.correctCount + existing.incorrectCount;
       const totalIncoming = word.correctCount + word.incorrectCount;
+      const patch: Partial<Word> = {};
       if (totalIncoming > totalExisting) {
-        await db.words.update(existing.id, {
-          reviewCount: word.reviewCount,
-          correctCount: word.correctCount,
-          incorrectCount: word.incorrectCount,
-          lastReviewedAt: word.lastReviewedAt ? new Date(word.lastReviewedAt) : existing.lastReviewedAt,
-        });
+        patch.reviewCount = word.reviewCount;
+        patch.correctCount = word.correctCount;
+        patch.incorrectCount = word.incorrectCount;
+        patch.lastReviewedAt = word.lastReviewedAt
+          ? new Date(word.lastReviewedAt)
+          : existing.lastReviewedAt;
+      }
+      // Ensure the existing row has inBank set (handles old rows that survived
+      // before the migration ran, e.g. after a partial upgrade).
+      if (existing.inBank === undefined) {
+        patch.inBank = 1;
+      }
+      if (Object.keys(patch).length > 0) {
+        await db.words.update(existing.id, patch);
       }
     }
   }

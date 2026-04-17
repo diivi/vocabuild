@@ -1,0 +1,124 @@
+{
+  "decks": [
+    {
+      "id": "gre-top-200",
+      "title": "Top 200 GRE Words",
+      "description": "High-frequency vocabulary asked on the GRE verbal section.",
+      "category": "GRE",
+      "emoji": "🎓",
+      "source": "Magoosh, GregMat, Manhattan Prep",
+      "difficulty": "advanced",
+      "file": "gre-top-200.md"
+    },
+    {
+      "id": "cuet-top-200",
+      "title": "Top 200 CUET Words",
+      "description": "Commonly tested vocabulary for the CUET-UG English section.",
+      "category": "CUET",
+      "emoji": "📘",
+      "source": "NCERT, CUET sample papers",
+      "difficulty": "intermediate",
+      "file": "cuet-top-200.md"
+    },
+    {
+      "id": "ielts-essentials",
+      "title": "IELTS Essentials",
+      "description": "Core IELTS vocabulary for reading, writing, and speaking.",
+      "category": "IELTS",
+      "emoji": "🌐",
+      "source": "IELTS Academic, Cambridge IELTS",
+      "difficulty": "intermediate",
+      "file": "ielts-essentials.md"
+    },
+    {
+      "id": "toefl-advanced",
+      "title": "TOEFL Advanced",
+      "description": "Advanced vocabulary often found on TOEFL iBT reading and listening.",
+      "category": "TOEFL",
+      "emoji": "🌍",
+      "source": "ETS Official Guide, Barron's TOEFL",
+      "difficulty": "advanced",
+      "file": "toefl-advanced.md"
+    },
+    {
+      "id": "sat-high-freq",
+      "title": "SAT High-Frequency",
+      "description": "High-frequency SAT vocabulary to sharpen your reading score.",
+      "category": "SAT",
+      "emoji": "✏️",
+      "source": "College Board, Barron's SAT",
+      "difficulty": "intermediate",
+      "file": "sat-high-freq.md"
+    },
+    {
+      "id": "cat-mba",
+      "title": "CAT & MBA Entrance",
+      "description": "Words commonly tested on CAT, XAT, SNAP, NMAT, and MBA entrance exams.",
+      "category": "CAT/MBA",
+      "emoji": "💼",
+      "source": "CAT VARC past papers, Word Power Made Easy",
+      "difficulty": "advanced",
+      "file": "cat-mba.md"
+    },
+    {
+      "id": "black-book",
+      "title": "Black Book Essentials",
+      "description": "Essential words from the Black Book of English Vocabulary — a staple for competitive exams.",
+      "category": "Competitive",
+      "emoji": "📕",
+      "source": "Black Book of English Vocabulary (Nikhil Gupta)",
+      "difficulty": "advanced",
+      "file": "black-book.md"
+    },
+    {
+      "id": "ssc-bank",
+      "title": "SSC & Bank PO",
+      "description": "High-frequency vocabulary for SSC CGL, Bank PO, and other Indian government exams.",
+      "category": "SSC/Bank",
+      "emoji": "🏛️",
+      "source": "SSC CGL, Bank PO mocks",
+      "difficulty": "intermediate",
+      "file": "ssc-bank.md"
+    },
+    {
+      "id": "foreign-phrases",
+      "title": "Foreign Words & Phrases",
+      "description": "Latin, French, German, and other loanwords commonly used in English — viz, ad hoc, sangfroid, tête-à-tête.",
+      "category": "Literary",
+      "emoji": "🗺️",
+      "source": "Oxford Dictionary of Foreign Words and Phrases",
+      "difficulty": "advanced",
+      "file": "foreign-phrases.md"
+    },
+    {
+      "id": "phrasal-verbs",
+      "title": "Common Phrasal Verbs",
+      "description": "Everyday English phrasal verbs — essential for fluency, speaking tests, and natural writing.",
+      "category": "ESL",
+      "emoji": "💬",
+      "source": "Cambridge Phrasal Verbs Dictionary",
+      "difficulty": "beginner",
+      "file": "phrasal-verbs.md"
+    },
+    {
+      "id": "literary",
+      "title": "Literary & Sophisticated",
+      "description": "Sophisticated words for literary writing and discerning readers.",
+      "category": "Literary",
+      "emoji": "📚",
+      "source": "Merriam-Webster, OED",
+      "difficulty": "advanced",
+      "file": "literary.md"
+    },
+    {
+      "id": "everyday-upgrade",
+      "title": "Everyday Upgrades",
+      "description": "Common words replaced by more sophisticated alternatives — instant writing and speaking upgrades.",
+      "category": "General",
+      "emoji": "✨",
+      "source": "Vocabulary.com, Word Power Made Easy",
+      "difficulty": "beginner",
+      "file": "everyday-upgrade.md"
+    }
+  ]
+}

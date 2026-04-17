@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
 import { Layout } from "@/components/layout/Layout";
 import { SearchTab } from "@/pages/SearchTab";
 import { WordBankTab } from "@/pages/WordBankTab";
 import { ReviewTab } from "@/pages/ReviewTab";
+import { DeckPage } from "@/pages/DeckPage";
 import { useTheme } from "@/hooks/useTheme";
 import { backgroundPush } from "@/lib/sync";
 
@@ -25,9 +27,11 @@ export default function App() {
           <Route index element={<SearchTab />} />
           <Route path="wordbank" element={<WordBankTab />} />
           <Route path="review" element={<ReviewTab />} />
+          <Route path="deck/:id" element={<DeckPage />} />
         </Route>
       </Routes>
       <Toaster position="top-center" />
+      <Analytics />
     </BrowserRouter>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchBar } from "@/components/search/SearchBar";
 import { WordCard } from "@/components/search/WordCard";
+import { DecksSection } from "@/components/decks/DecksSection";
 import { useWordLookup } from "@/hooks/useWordLookup";
 import { toast } from "sonner";
 
@@ -80,16 +81,7 @@ export function SearchTab() {
         <WordCard word={word} onWordClick={handleSearch} isLoading={isLoading} />
       )}
 
-      {!word && !isLoading && !error && (
-        <div className="flex flex-col items-center pt-16 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-            <span className="text-3xl">📖</span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Search for a word to get started
-          </p>
-        </div>
-      )}
+      {!word && !isLoading && !error && <DecksSection />}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { shuffleArray } from "@/lib/utils";
 import { getWordsForReview, getAllWords } from "@/lib/db-operations";
 import { getRandomCuratedWords, type CuratedWord } from "./curated-words";
-import type { Word } from "@/lib/db";
+import { db, type Word } from "@/lib/db";
 
 export type QuizType = "meaning" | "synonym" | "antonym";
 
@@ -40,6 +40,7 @@ function curatedToWordData(cw: CuratedWord): Word {
     allExamples: [],
     primaryDefinition: cw.definition,
     primaryPartOfSpeech: cw.partOfSpeech,
+    inBank: 0,
   };
 }
 
@@ -276,6 +277,99 @@ export async function generateQuiz(
         cw.word
       );
       question = generateMeaningQuestion(cw, distractors, true);
+    }
+
+    if (question) questions.push(question);
+  }
+
+  return shuffleArray(questions);
+}
+
+/**
+ * Generate a quiz from a specific list of words (typically a deck).
+ * Expects the caller to have prefetched definitions so the words exist in the
+ * local DB (bank or previewed). Words without an entry are silently skipped.
+ */
+export async function generateQuizFromWordList(
+  wordList: string[],
+  type: QuizType | "mixed",
+  count: number = 10
+): Promise<QuizQuestion[]> {
+  const normalized = [...new Set(wordList.map((w) => w.trim().toLowerCase()))];
+  if (normalized.length === 0) return [];
+
+  const deckWordRows = await db.words
+    .where("word")
+    .anyOf(normalized)
+    .toArray();
+  if (deckWordRows.length === 0) return [];
+
+  // Use every word we know for distractors, plus curated words as a fallback.
+  // This keeps quizzes rich even when the user's bank is empty.
+  const allWords = await db.words.toArray();
+  const curatedPool = getRandomCuratedWords(30, normalized);
+
+  // Prioritise deck words that need review most (low accuracy / stale)
+  const scored = deckWordRows.map((word) => {
+    const accuracy =
+      word.reviewCount === 0 ? 0 : word.correctCount / word.reviewCount;
+    const daysSinceReview = word.lastReviewedAt
+      ? (Date.now() - word.lastReviewedAt.getTime()) / (1000 * 60 * 60 * 24)
+      : Infinity;
+    return {
+      word,
+      priority: (1 - accuracy) * 50 + Math.min(daysSinceReview, 30) * 2,
+    };
+  });
+  scored.sort((a, b) => b.priority - a.priority);
+  const selected = scored.slice(0, count).map((s) => s.word);
+
+  const questions: QuizQuestion[] = [];
+  const types: QuizType[] =
+    type === "mixed"
+      ? shuffleArray(["meaning", "synonym", "antonym"] as QuizType[])
+      : [type];
+
+  for (const word of selected) {
+    if (questions.length >= count) break;
+
+    const qType =
+      type === "mixed" ? types[questions.length % types.length] : type;
+
+    let question: QuizQuestion | null = null;
+
+    if (qType === "meaning") {
+      const distractors = collectDistractorDefinitions(
+        allWords,
+        curatedPool,
+        word.word
+      );
+      question = generateMeaningQuestion(word, distractors, false);
+    } else if (qType === "synonym") {
+      const distractors = collectDistractorWords(
+        allWords,
+        curatedPool,
+        [word.word, ...word.allSynonyms],
+        "synonym"
+      );
+      question = generateSynonymQuestion(word, distractors, false);
+    } else {
+      const distractors = collectDistractorWords(
+        allWords,
+        curatedPool,
+        [word.word, ...word.allAntonyms],
+        "antonym"
+      );
+      question = generateAntonymQuestion(word, distractors, false);
+    }
+
+    if (!question && qType !== "meaning") {
+      const distractors = collectDistractorDefinitions(
+        allWords,
+        curatedPool,
+        word.word
+      );
+      question = generateMeaningQuestion(word, distractors, false);
     }
 
     if (question) questions.push(question);

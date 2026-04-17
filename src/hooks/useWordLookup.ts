@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { lookupWord, WordNotFoundError } from "@/lib/api/dictionary";
 import { getSynonyms, getAntonyms } from "@/lib/api/datamuse";
-import { saveWord, getWord } from "@/lib/db-operations";
+import { saveWord, getWord, setWordInBank } from "@/lib/db-operations";
 import { backgroundPush } from "@/lib/sync";
 import type { Word } from "@/lib/db";
 import type { DictionaryApiResponse } from "@/lib/api/dictionary";
@@ -32,6 +32,12 @@ export function useWordLookup() {
     // Check local cache first
     const cached = await getWord(trimmed);
     if (cached) {
+      // A user-initiated search always lands the word in the bank, even if it
+      // was previously only previewed from a deck.
+      if (cached.inBank !== 1 && cached.id) {
+        await setWordInBank(cached.id, true);
+        cached.inBank = 1;
+      }
       setState({
         word: cached,
         apiResponse: null,
@@ -73,7 +79,11 @@ export function useWordLookup() {
         extraAntonyms = antonyms;
       }
 
-      await saveWord(response, extraSynonyms, extraAntonyms);
+      await saveWord(response, {
+        inBank: true,
+        extraSynonyms,
+        extraAntonyms,
+      });
       backgroundPush();
       const savedWord = await getWord(trimmed);
 

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Volume2 } from "lucide-react";
+import { Volume2, BookmarkPlus, BookmarkCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AiInsights } from "./AiInsights";
 import { cn } from "@/lib/utils";
@@ -10,9 +10,22 @@ interface WordCardProps {
   onWordClick?: (word: string) => void;
   isLoading?: boolean;
   compact?: boolean;
+  /**
+   * When provided, renders a small bookmark toggle in the header that flips
+   * `inBank` on/off. Pass the current state separately so the caller controls it.
+   */
+  onToggleBank?: (next: boolean) => void;
+  isInBank?: boolean;
 }
 
-export function WordCard({ word, onWordClick, isLoading, compact }: WordCardProps) {
+export function WordCard({
+  word,
+  onWordClick,
+  isLoading,
+  compact,
+  onToggleBank,
+  isInBank,
+}: WordCardProps) {
   const phonetic = word.phonetics.find((p) => p.text)?.text ?? "";
   const audioUrl = word.phonetics.find((p) => p.audio && p.audio.length > 0)?.audio;
 
@@ -48,13 +61,34 @@ export function WordCard({ word, onWordClick, isLoading, compact }: WordCardProp
             <p className="text-sm text-muted-foreground">{phonetic}</p>
           )}
         </div>
-        <button
-          onClick={playAudio}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 active:scale-95"
-          aria-label="Play pronunciation"
-        >
-          <Volume2 className="h-5 w-5" />
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          {onToggleBank && (
+            <button
+              onClick={() => onToggleBank(!isInBank)}
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full transition-colors active:scale-95",
+                isInBank
+                  ? "bg-success/15 text-success hover:bg-success/25"
+                  : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
+              )}
+              aria-label={isInBank ? "Remove from word bank" : "Add to word bank"}
+              title={isInBank ? "In your bank" : "Add to bank"}
+            >
+              {isInBank ? (
+                <BookmarkCheck className="h-5 w-5" />
+              ) : (
+                <BookmarkPlus className="h-5 w-5" />
+              )}
+            </button>
+          )}
+          <button
+            onClick={playAudio}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 active:scale-95"
+            aria-label="Play pronunciation"
+          >
+            <Volume2 className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {/* Meanings */}

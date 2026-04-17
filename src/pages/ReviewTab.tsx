@@ -1,31 +1,34 @@
-import { useState, useEffect, useRef } from "react";
-import { Brain, BookOpen, ArrowRightLeft, Shuffle, Sparkles, Trophy, Target, Flame } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import {
+  Brain,
+  BookOpen,
+  ArrowRightLeft,
+  Shuffle,
+  Trophy,
+  Target,
+  Flame,
+  Info,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { WordCard } from "@/components/search/WordCard";
 import { ContributionChart } from "@/components/review/ContributionChart";
-import { generateQuiz, type QuizType, type QuizQuestion } from "@/lib/quiz/quiz-engine";
-import { recordQuizAttempt, getQuizStats, getWordCount } from "@/lib/db-operations";
+import { QuizRunner, type QuizResult } from "@/components/review/QuizRunner";
+import { QuizResults } from "@/components/review/QuizResults";
+import {
+  generateQuiz,
+  type QuizType,
+  type QuizQuestion,
+} from "@/lib/quiz/quiz-engine";
+import { getQuizStats, getWordCount } from "@/lib/db-operations";
 import { cn } from "@/lib/utils";
 
 type QuizState = "menu" | "playing" | "results";
 
-interface QuizResult {
-  question: QuizQuestion;
-  userAnswer: string;
-  isCorrect: boolean;
-}
-
 export function ReviewTab() {
   const [quizState, setQuizState] = useState<QuizState>("menu");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [results, setResults] = useState<QuizResult[]>([]);
-  const [expandedResult, setExpandedResult] = useState<number | null>(null);
-  const sessionIdRef = useRef("");
   const [stats, setStats] = useState({
     quizzesTaken: 0,
     questionsAnswered: 0,
@@ -34,6 +37,7 @@ export function ReviewTab() {
     totalWords: 0,
     reviewedWords: 0,
     masteredWords: 0,
+    wordsDue: 0,
   });
   const [wordCount, setWordCount] = useState(0);
 
@@ -50,52 +54,22 @@ export function ReviewTab() {
   const startQuiz = async (type: QuizType | "mixed") => {
     const q = await generateQuiz(type, 10);
     if (q.length === 0) return;
-    sessionIdRef.current = crypto.randomUUID();
     setQuestions(q);
-    setCurrentIndex(0);
-    setSelectedAnswer(null);
     setResults([]);
-    setExpandedResult(null);
     setQuizState("playing");
   };
 
-  const handleAnswer = async (answer: string) => {
-    if (selectedAnswer !== null) return;
-    setSelectedAnswer(answer);
-
-    const question = questions[currentIndex];
-    const isCorrect = answer === question.correctAnswer;
-
-    if (navigator.vibrate) {
-      navigator.vibrate(isCorrect ? 50 : [50, 30, 50]);
-    }
-
-    const result: QuizResult = { question, userAnswer: answer, isCorrect };
-    setResults((prev) => [...prev, result]);
-
-    // Record the attempt with the session ID
-    if (question.wordId > 0) {
-      await recordQuizAttempt({
-        sessionId: sessionIdRef.current,
-        wordId: question.wordId,
-        word: question.word,
-        quizType: question.quizType,
-        userAnswer: answer,
-        correctAnswer: question.correctAnswer,
-        isCorrect,
-        attemptedAt: new Date(),
-      });
-    }
+  const handleFinish = async (r: QuizResult[]) => {
+    setResults(r);
+    setQuizState("results");
+    await loadStats();
   };
 
-  const nextQuestion = () => {
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex((i) => i + 1);
-      setSelectedAnswer(null);
-    } else {
-      setQuizState("results");
-      loadStats();
-    }
+  const handleRetryMistakes = (mistakes: QuizResult[]) => {
+    if (mistakes.length === 0) return;
+    setQuestions(mistakes.map((m) => m.question));
+    setResults([]);
+    setQuizState("playing");
   };
 
   const backToMenu = () => {
@@ -103,179 +77,42 @@ export function ReviewTab() {
     loadStats();
   };
 
-  // --- Playing state ---
   if (quizState === "playing" && questions.length > 0) {
-    const question = questions[currentIndex];
-    const progress = ((currentIndex + (selectedAnswer ? 1 : 0)) / questions.length) * 100;
-    const answered = selectedAnswer !== null;
-
     return (
-      <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
-            {currentIndex + 1} / {questions.length}
-          </span>
-          <Badge variant="outline" className="text-xs capitalize">
-            {question.quizType}
-          </Badge>
-        </div>
-        <Progress value={progress} className="h-1.5" />
-
-        <div className="space-y-4 pt-2">
-          <div className="flex items-center gap-2">
-            {question.isNewWord && (
-              <Badge className="gap-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                <Sparkles className="h-3 w-3" />
-                New Word
-              </Badge>
-            )}
-          </div>
-
-          <h2 className="text-lg font-semibold text-foreground">
-            {question.question}
-          </h2>
-
-          <div className="space-y-2.5">
-            {question.options.map((option, i) => {
-              const isSelected = selectedAnswer === option;
-              const isCorrect = option === question.correctAnswer;
-              const showResult = answered;
-
-              return (
-                <button
-                  key={i}
-                  onClick={() => handleAnswer(option)}
-                  disabled={answered}
-                  className={cn(
-                    "w-full rounded-xl border p-3.5 text-left text-sm transition-all",
-                    !showResult &&
-                      "hover:border-primary/50 hover:bg-primary/5 active:scale-[0.98]",
-                    showResult && isCorrect &&
-                      "border-success bg-success/10 text-success",
-                    showResult && isSelected && !isCorrect &&
-                      "border-destructive bg-destructive/10 text-destructive",
-                    showResult && !isSelected && !isCorrect &&
-                      "opacity-50"
-                  )}
-                >
-                  <span className="mr-2 font-medium text-muted-foreground">
-                    {String.fromCharCode(65 + i)})
-                  </span>
-                  {option}
-                </button>
-              );
-            })}
-          </div>
-
-          {answered && question.wordData && (
-            <WordCard word={question.wordData} compact />
-          )}
-
-          {answered && (
-            <Button onClick={nextQuestion} className="w-full rounded-xl">
-              {currentIndex < questions.length - 1 ? "Next" : "See Results"}
-            </Button>
-          )}
-        </div>
-      </div>
+      <QuizRunner questions={questions} onFinish={handleFinish} onExit={backToMenu} />
     );
   }
 
-  // --- Results state ---
   if (quizState === "results") {
-    const correct = results.filter((r) => r.isCorrect).length;
-    const total = results.length;
-    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
-
     return (
-      <div className="space-y-5">
-        <div className="text-center">
-          <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-            <span className="text-3xl font-bold text-primary">{pct}%</span>
-          </div>
-          <h2 className="text-xl font-bold text-foreground">
-            {correct} / {total} correct
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {pct >= 80
-              ? "Excellent work!"
-              : pct >= 60
-                ? "Good effort, keep it up!"
-                : "Keep practicing, you'll get there!"}
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          {results.map((r, i) => (
-            <div key={i}>
-              <button
-                onClick={() => setExpandedResult(expandedResult === i ? null : i)}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors",
-                  r.isCorrect
-                    ? "border-success/20 bg-success/5"
-                    : "border-destructive/20 bg-destructive/5"
-                )}
-              >
-                <span className={cn("text-lg", r.isCorrect ? "text-success" : "text-destructive")}>
-                  {r.isCorrect ? "✓" : "✗"}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{r.question.word}</p>
-                  {!r.isCorrect && (
-                    <p className="text-xs text-muted-foreground">
-                      Correct: {r.question.correctAnswer}
-                    </p>
-                  )}
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {expandedResult === i ? "▲" : "▼"}
-                </span>
-              </button>
-              {expandedResult === i && r.question.wordData && (
-                <div className="mt-2">
-                  <WordCard word={r.question.wordData} compact />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={backToMenu} className="flex-1 rounded-xl">
-            Back
-          </Button>
-          <Button
-            onClick={() => {
-              const incorrectWords = results
-                .filter((r) => !r.isCorrect)
-                .map((r) => r.question);
-              if (incorrectWords.length > 0) {
-                sessionIdRef.current = crypto.randomUUID();
-                setQuestions(incorrectWords);
-                setCurrentIndex(0);
-                setSelectedAnswer(null);
-                setResults([]);
-                setExpandedResult(null);
-                setQuizState("playing");
-              }
-            }}
-            disabled={results.every((r) => r.isCorrect)}
-            className="flex-1 rounded-xl"
-          >
-            Review Mistakes
-          </Button>
-        </div>
-      </div>
+      <QuizResults
+        results={results}
+        onBack={backToMenu}
+        onRetryMistakes={handleRetryMistakes}
+      />
     );
   }
 
-  // --- Menu state ---
   const canQuiz = wordCount >= 2;
+  const allCaughtUp = canQuiz && stats.wordsDue === 0;
 
   return (
     <div className="space-y-5">
-      <h1 className="text-xl font-bold text-foreground">Review</h1>
+      <div>
+        <h1 className="text-xl font-bold text-foreground">Review</h1>
+        <p className="mt-0.5 text-xs text-muted-foreground">Your saved word bank</p>
+      </div>
+
+      <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
+        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+        <p>
+          Review quizzes only use words you've{" "}
+          <span className="font-medium text-foreground">added to your word bank</span>.
+          To study a deck, open it from Home and use{" "}
+          <span className="font-medium text-foreground">Study this deck</span>{" "}
+          — you can then bookmark individual words you want to keep.
+        </p>
+      </div>
 
       <div className="grid grid-cols-3 gap-2">
         <Card className="flex flex-col items-center gap-1 p-3">
@@ -306,44 +143,77 @@ export function ReviewTab() {
           </div>
           <h2 className="text-lg font-semibold">Not enough words yet</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Search at least 2 words to start quizzing
+            Add at least 2 words to your bank to start reviewing
           </p>
         </div>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
-            Choose a quiz mode to test your vocabulary
-          </p>
+          {/* Due / caught-up banner */}
+          {allCaughtUp ? (
+            <div className="flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 p-4">
+              <CheckCircle2 className="h-6 w-6 shrink-0 text-success" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  You're all caught up!
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  No words are due right now. Come back later or study anyway below.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <Clock className="h-6 w-6 shrink-0 text-primary" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  {stats.wordsDue} word{stats.wordsDue === 1 ? "" : "s"} due for review
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Words you've recently struggled with or haven't seen in a while.
+                </p>
+              </div>
+            </div>
+          )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => startQuiz("meaning")}
-              className="flex flex-col items-center gap-2 rounded-2xl border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm active:scale-[0.97]"
-            >
-              <BookOpen className="h-7 w-7 text-primary" />
-              <span className="text-sm font-medium">Meanings</span>
-            </button>
-            <button
-              onClick={() => startQuiz("synonym")}
-              className="flex flex-col items-center gap-2 rounded-2xl border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm active:scale-[0.97]"
-            >
-              <ArrowRightLeft className="h-7 w-7 text-chart-2" />
-              <span className="text-sm font-medium">Synonyms</span>
-            </button>
-            <button
-              onClick={() => startQuiz("antonym")}
-              className="flex flex-col items-center gap-2 rounded-2xl border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm active:scale-[0.97]"
-            >
-              <Brain className="h-7 w-7 text-chart-5" />
-              <span className="text-sm font-medium">Antonyms</span>
-            </button>
-            <button
-              onClick={() => startQuiz("mixed")}
-              className="flex flex-col items-center gap-2 rounded-2xl border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm active:scale-[0.97]"
-            >
-              <Shuffle className="h-7 w-7 text-chart-1" />
-              <span className="text-sm font-medium">Mixed</span>
-            </button>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {allCaughtUp ? "Study anyway" : "Quiz mode"}
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {(
+                [
+                  { type: "meaning" as const, icon: BookOpen, label: "Meanings", color: "text-primary" },
+                  { type: "synonym" as const, icon: ArrowRightLeft, label: "Synonyms", color: "text-chart-2" },
+                  { type: "antonym" as const, icon: Brain, label: "Antonyms", color: "text-chart-5" },
+                  { type: "mixed" as const, icon: Shuffle, label: "Mixed", color: "text-chart-1" },
+                ] as const
+              ).map(({ type, icon: Icon, label, color }) => (
+                <button
+                  key={type}
+                  onClick={() => startQuiz(type)}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-2xl border bg-card p-5 transition-all",
+                    "hover:border-primary/40 hover:shadow-sm active:scale-[0.97]"
+                  )}
+                >
+                  <Icon className={cn("h-7 w-7", color)} />
+                  <span className="text-sm font-medium">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* SRS explanation */}
+          <div className="rounded-xl border bg-muted/30 p-3 text-[11px] text-muted-foreground space-y-1">
+            <p className="font-semibold text-foreground">How scheduling works</p>
+            <p>Words are spaced out based on how well you know them:</p>
+            <ul className="list-disc space-y-0.5 pl-4">
+              <li>Answer correctly → interval roughly doubles each time</li>
+              <li>Answer wrong → interval resets to 1 day</li>
+              <li>
+                Mastered (≥5 reviews, ≥90% accuracy) → reviewed monthly
+              </li>
+            </ul>
           </div>
         </>
       )}

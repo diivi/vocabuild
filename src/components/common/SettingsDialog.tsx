@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, type ReactElement } from "react";
 import {
   Settings, Key, Trash2, Check, Sun, Moon, Monitor,
-  Download, Upload, RefreshCw, CloudUpload,
+  Download, Upload, RefreshCw, CloudUpload, AlertTriangle,
 } from "lucide-react";
 import {
   Dialog,
@@ -18,17 +18,25 @@ import {
   exportData, importData,
   hasGistToken, setGistToken, removeGistToken, syncWithGist,
 } from "@/lib/sync";
+import { db } from "@/lib/db";
 import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-export function SettingsDialog() {
+interface SettingsDialogProps {
+  /** Custom trigger element — rendered via Base UI's `render` prop so styles are preserved. */
+  trigger?: ReactElement;
+}
+
+export function SettingsDialog({ trigger }: SettingsDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [geminiApiKey, setGeminiApiKey] = useState("");
   const [hasGemini, setHasGemini] = useState(hasGeminiKey);
   const [gistToken, setGistTokenInput] = useState("");
   const [hasGist, setHasGist] = useState(hasGistToken);
   const [syncing, setSyncing] = useState(false);
+  const [resetConfirm, setResetConfirm] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -94,6 +102,29 @@ export function SettingsDialog() {
     }
   };
 
+  const handleReset = async () => {
+    if (!resetConfirm) {
+      setResetConfirm(true);
+      return;
+    }
+    setResetting(true);
+    try {
+      // Clear all IndexedDB tables
+      await db.words.clear();
+      await db.quizAttempts.clear();
+      await db.customDecks.clear();
+      await db.deckProgress.clear();
+      // Clear localStorage (API keys, sync tokens, theme)
+      localStorage.clear();
+      toast.success("All data cleared — reloading…");
+      setTimeout(() => window.location.reload(), 800);
+    } catch {
+      toast.error("Reset failed — try again");
+      setResetting(false);
+      setResetConfirm(false);
+    }
+  };
+
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -111,10 +142,20 @@ export function SettingsDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-        <Settings className="h-4 w-4" />
-      </DialogTrigger>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) setResetConfirm(false);
+      }}
+    >
+      {trigger ? (
+        <DialogTrigger render={trigger} />
+      ) : (
+        <DialogTrigger className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+          <Settings className="h-4 w-4" />
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-sm max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
@@ -262,6 +303,57 @@ export function SettingsDialog() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* --- Danger zone --- */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-destructive">Danger zone</label>
+
+            {resetConfirm ? (
+              <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
+                <div className="flex items-start gap-2 text-xs text-destructive">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <p>
+                    <span className="font-semibold">This will permanently delete</span> your
+                    entire word bank, quiz history, custom decks, API keys, and sync settings.
+                    This cannot be undone.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setResetConfirm(false)}
+                    disabled={resetting}
+                    className="flex-1 rounded-lg"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleReset}
+                    disabled={resetting}
+                    className="flex-1 rounded-lg"
+                  >
+                    {resetting ? "Resetting…" : "Yes, reset everything"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setResetConfirm(true)}
+                className="w-full gap-2 rounded-lg border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Reset everything
+              </Button>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Wipes all local data and starts fresh. Export a backup first if you want to keep your words.
+            </p>
           </div>
         </div>
       </DialogContent>
