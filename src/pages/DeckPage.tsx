@@ -213,7 +213,7 @@ export function DeckPage() {
     if (!confirm(`Delete "${deck.title}"? This cannot be undone.`)) return;
     await deleteCustomDeck(deck.id);
     toast.success("Deck deleted");
-    navigate("/");
+    navigate("/home");
   };
 
   // --- Render ---------------------------------------------------------------
@@ -236,7 +236,7 @@ export function DeckPage() {
     return (
       <div className="pt-10 text-center">
         <p className="text-sm text-muted-foreground">{error ?? "Deck not found"}</p>
-        <Button variant="outline" onClick={() => navigate("/")} className="mt-4 rounded-lg">
+        <Button variant="outline" onClick={() => navigate("/home")} className="mt-4 rounded-lg">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back home
         </Button>
@@ -294,7 +294,7 @@ export function DeckPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/home")}
             className="-ml-2 shrink-0"
             aria-label="Back"
           >

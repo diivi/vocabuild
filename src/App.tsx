@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
 import { Layout } from "@/components/layout/Layout";
+import { LandingPage } from "@/pages/LandingPage";
 import { SearchTab } from "@/pages/SearchTab";
 import { WordBankTab } from "@/pages/WordBankTab";
 import { ReviewTab } from "@/pages/ReviewTab";
@@ -23,8 +24,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Landing page — outside the app layout */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Main app — wrapped in Layout (bottom nav, header, etc.) */}
         <Route element={<Layout />}>
-          <Route index element={<SearchTab />} />
+          <Route path="home" element={<SearchTab />} />
           <Route path="wordbank" element={<WordBankTab />} />
           <Route path="review" element={<ReviewTab />} />
           <Route path="deck/:id" element={<DeckPage />} />

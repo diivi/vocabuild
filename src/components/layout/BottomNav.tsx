@@ -4,7 +4,7 @@ import { SettingsDialog } from "@/components/common/SettingsDialog";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { to: "/", icon: Home, label: "Home" },
+  { to: "/home", icon: Home, label: "Home" },
   { to: "/wordbank", icon: BookOpen, label: "Word Bank" },
   { to: "/review", icon: GraduationCap, label: "Review" },
 ] as const;
@@ -25,7 +25,7 @@ export function BottomNav() {
           <NavLink
             key={to}
             to={to}
-            end={to === "/"}
+            end={to === "/home"}
             className={({ isActive }) =>
               cn(tabClass, isActive ? activeClass : inactiveClass)
             }
