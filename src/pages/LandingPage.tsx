@@ -249,22 +249,28 @@ export function LandingPage() {
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden px-4 pb-20 pt-16">
-        {/* Animated background blobs */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl"
-          style={{ animation: "blob 10s ease-in-out infinite" }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-16 -right-16 h-80 w-80 rounded-full bg-primary/15 blur-3xl"
-          style={{ animation: "blob 13s ease-in-out infinite 3s" }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl"
-          style={{ animation: "blob 16s ease-in-out infinite 6s" }}
-        />
+        {/* Lava-lamp blobs — spread at corners/edges, negative delays = instant motion */}
+        {/* Top-left corner */}
+        <div aria-hidden className="pointer-events-none absolute -top-16 -left-16 h-96 w-96 rounded-full bg-primary/22 blur-3xl"
+          style={{ animation: "lava-a 16s ease-in-out infinite -6s" }} />
+        {/* Top-right corner */}
+        <div aria-hidden className="pointer-events-none absolute -top-16 -right-16 h-[26rem] w-[26rem] rounded-full bg-primary/18 blur-3xl"
+          style={{ animation: "lava-b 18s ease-in-out infinite -11s" }} />
+        {/* Bottom-left corner */}
+        <div aria-hidden className="pointer-events-none absolute -bottom-12 -left-12 h-80 w-80 rounded-full bg-primary/20 blur-3xl"
+          style={{ animation: "lava-c 14s ease-in-out infinite -4s" }} />
+        {/* Bottom-right corner */}
+        <div aria-hidden className="pointer-events-none absolute -bottom-12 -right-12 h-[22rem] w-[22rem] rounded-full bg-primary/16 blur-3xl"
+          style={{ animation: "lava-a 19s ease-in-out infinite -9s" }} />
+        {/* Left-center edge */}
+        <div aria-hidden className="pointer-events-none absolute top-1/2 -left-20 h-64 w-64 -translate-y-1/2 rounded-full bg-primary/24 blur-2xl"
+          style={{ animation: "lava-b 12s ease-in-out infinite -3s" }} />
+        {/* Right-center edge */}
+        <div aria-hidden className="pointer-events-none absolute top-1/2 -right-20 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/20 blur-2xl"
+          style={{ animation: "lava-c 15s ease-in-out infinite -7s" }} />
+        {/* Center drifter */}
+        <div aria-hidden className="pointer-events-none absolute top-1/3 left-1/3 h-48 w-48 rounded-full bg-primary/14 blur-2xl"
+          style={{ animation: "lava-a 13s ease-in-out infinite -5s" }} />
 
         <div className="relative mx-auto max-w-3xl text-center">
           <div
@@ -486,17 +492,15 @@ export function LandingPage() {
 
       {/* ── Final CTA ── */}
       <section className="relative overflow-hidden border-t bg-primary px-4 py-20 text-center text-primary-foreground">
-        {/* Moving blobs in CTA too */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-16 left-1/4 h-56 w-56 rounded-full bg-primary-foreground/10 blur-3xl"
-          style={{ animation: "blob 9s ease-in-out infinite" }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-16 right-1/4 h-56 w-56 rounded-full bg-primary-foreground/10 blur-3xl"
-          style={{ animation: "blob 12s ease-in-out infinite 4s" }}
-        />
+        {/* Lava blobs in CTA — corners, negative delays = instant motion */}
+        <div aria-hidden className="pointer-events-none absolute -top-12 -left-12 h-80 w-80 rounded-full bg-primary-foreground/12 blur-3xl"
+          style={{ animation: "lava-a 15s ease-in-out infinite -5s" }} />
+        <div aria-hidden className="pointer-events-none absolute -top-12 -right-12 h-72 w-72 rounded-full bg-primary-foreground/10 blur-3xl"
+          style={{ animation: "lava-b 17s ease-in-out infinite -9s" }} />
+        <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-10 h-64 w-64 rounded-full bg-primary-foreground/10 blur-3xl"
+          style={{ animation: "lava-c 13s ease-in-out infinite -3s" }} />
+        <div aria-hidden className="pointer-events-none absolute -bottom-10 -right-10 h-56 w-56 rounded-full bg-primary-foreground/12 blur-2xl"
+          style={{ animation: "lava-a 16s ease-in-out infinite -7s" }} />
         <div className="relative mx-auto max-w-xl">
           <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
             Ready to build your vocabulary?
