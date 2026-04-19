@@ -9,8 +9,10 @@ import {
   Zap,
   RefreshCw,
   Shield,
+  MessageSquareHeart,
 } from "lucide-react";
 import { WordCard } from "@/components/search/WordCard";
+import { FeedbackFAB, FeedbackFormBody } from "@/components/common/FeedbackFAB";
 import { cn } from "@/lib/utils";
 import type { Word } from "@/lib/db";
 
@@ -224,12 +226,55 @@ function DeckCardDemo({ emoji, title, description, count, category }: (typeof DE
 }
 
 // ---------------------------------------------------------------------------
+// Feedback form — sends to ntfy.sh/vocabuild
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Feedback section — full-width landing page version
+// ---------------------------------------------------------------------------
+
+function FeedbackSection() {
+  return (
+    <section id="feedback" className="border-t px-4 py-16">
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-8 text-center">
+          <div className="mb-3 inline-flex items-center justify-center rounded-full bg-primary/10 p-3">
+            <MessageSquareHeart className="h-6 w-6 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
+            Got a minute? Share your thoughts.
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground leading-relaxed">
+            I read <span className="font-medium text-foreground">every single piece of feedback</span> personally.
+            VocaBuild is a solo project and your input directly shapes what gets built next —
+            whether it's a missing feature, a bug, or just something that felt off.
+          </p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground leading-relaxed">
+            If VocaBuild is helping you, the best thing you can do is{" "}
+            <span className="font-medium text-foreground">tell a friend</span>. More users = more
+            feedback = a better app for everyone.
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground/70">
+            No account needed · Completely anonymous · Takes 30 seconds
+          </p>
+        </div>
+        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+          <FeedbackFormBody />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main landing page
 // ---------------------------------------------------------------------------
 
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
+
+      <FeedbackFAB />
 
       {/* ── Navbar ── */}
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
@@ -520,6 +565,9 @@ export function LandingPage() {
           </p>
         </div>
       </section>
+
+      {/* ── Feedback ── */}
+      <FeedbackSection />
 
       {/* ── Footer ── */}
       <footer className="border-t px-4 py-6 text-center text-xs text-muted-foreground">
