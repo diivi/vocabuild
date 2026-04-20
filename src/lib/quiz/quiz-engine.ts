@@ -285,6 +285,51 @@ export async function generateQuiz(
   return shuffleArray(questions);
 }
 
+/** Generate a 5-question mixed quiz for the daily challenge.
+ *  Always produces 5 questions by filling remaining slots from the curated pool,
+ *  so it works even when the user has no bank words yet.
+ */
+export async function generateDailyQuiz(): Promise<QuizQuestion[]> {
+  const TARGET = 5;
+  const bankWords = await getWordsForReview(TARGET);
+  const allWords = await getAllWords();
+  const existingWordStrings = allWords.map((w) => w.word);
+
+  // Fill any remaining slots (up to TARGET) with curated words
+  const neededCurated = Math.max(1, TARGET - bankWords.length);
+  const curatedPool = getRandomCuratedWords(neededCurated * 4 + 10, existingWordStrings);
+  const curatedForQuiz = curatedPool.slice(0, neededCurated);
+
+  const questions: QuizQuestion[] = [];
+  const types: QuizType[] = shuffleArray(["meaning", "synonym", "antonym"] as QuizType[]);
+
+  for (const word of bankWords.slice(0, TARGET - curatedForQuiz.length)) {
+    const qType = types[questions.length % types.length];
+    let question: QuizQuestion | null = null;
+
+    if (qType === "meaning") {
+      question = generateMeaningQuestion(word, collectDistractorDefinitions(allWords, curatedPool, word.word), false);
+    } else if (qType === "synonym") {
+      question = generateSynonymQuestion(word, collectDistractorWords(allWords, curatedPool, [word.word, ...word.allSynonyms], "synonym"), false);
+    } else {
+      question = generateAntonymQuestion(word, collectDistractorWords(allWords, curatedPool, [word.word, ...word.allAntonyms], "antonym"), false);
+    }
+    if (!question && qType !== "meaning") {
+      question = generateMeaningQuestion(word, collectDistractorDefinitions(allWords, curatedPool, word.word), false);
+    }
+    if (question) questions.push(question);
+  }
+
+  for (const cw of curatedForQuiz) {
+    if (questions.length >= TARGET) break;
+    const distractors = collectDistractorDefinitions(allWords, curatedPool, cw.word);
+    const question = generateMeaningQuestion(cw, distractors, true);
+    if (question) questions.push(question);
+  }
+
+  return shuffleArray(questions);
+}
+
 /**
  * Generate a quiz from a specific list of words (typically a deck).
  * Expects the caller to have prefetched definitions so the words exist in the

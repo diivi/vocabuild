@@ -81,11 +81,21 @@ export interface DeckProgressRow {
   lastOpenedAt: number;
 }
 
+export interface UserSentence {
+  id?: number;
+  wordId: number;
+  word: string;
+  sentence: string;
+  createdAt: Date;
+  isDailyChallenge: boolean;
+}
+
 class VocaBuildDB extends Dexie {
   words!: EntityTable<Word, "id">;
   quizAttempts!: EntityTable<QuizAttempt, "id">;
   customDecks!: EntityTable<CustomDeckRow, "id">;
   deckProgress!: EntityTable<DeckProgressRow, "id">;
+  userSentences!: EntityTable<UserSentence, "id">;
 
   constructor() {
     super("vocabuild");
@@ -137,6 +147,15 @@ class VocaBuildDB extends Dexie {
         // mark them all as being in the bank.
         await tx.table("words").toCollection().modify({ inBank: 1 });
       });
+
+    // v5: add userSentences table for "use in a sentence" feature
+    this.version(5).stores({
+      words: "++id, &word, inBank, searchedAt, lastReviewedAt, reviewCount",
+      quizAttempts: "++id, sessionId, wordId, quizType, attemptedAt",
+      customDecks: "++id, &deckId, createdAt",
+      deckProgress: "++id, &deckId, lastOpenedAt",
+      userSentences: "++id, wordId, word, createdAt",
+    });
   }
 }
 

@@ -150,6 +150,7 @@ export function QuizRunner({ questions, onFinish, onExit, title }: QuizRunnerPro
             compact
             onToggleBank={question.wordId > 0 ? handleToggleBank : undefined}
             isInBank={isInBank}
+            showBankNudge={selectedAnswer !== question.correctAnswer && !isInBank && question.wordId > 0}
           />
         )}
 

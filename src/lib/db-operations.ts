@@ -1,5 +1,6 @@
-import { db, type Word, type QuizAttempt } from "./db";
+import { db, type Word, type QuizAttempt, type UserSentence } from "./db";
 import type { DictionaryApiResponse } from "./api/dictionary";
+import { getRandomCuratedWords, type CuratedWord } from "./quiz/curated-words";
 
 // ---------------------------------------------------------------------------
 // Spaced-repetition helpers
@@ -357,4 +358,100 @@ export async function deleteWord(id: number): Promise<void> {
 
 export async function getWordCount(): Promise<number> {
   return db.words.where("inBank").equals(1).count();
+}
+
+// ---------------------------------------------------------------------------
+// Daily helpers
+// ---------------------------------------------------------------------------
+
+export function getTodayString(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// ---------------------------------------------------------------------------
+// Sentence log
+// ---------------------------------------------------------------------------
+
+export async function addUserSentence(
+  data: Omit<UserSentence, "id" | "createdAt">
+): Promise<void> {
+  await db.userSentences.add({ ...data, createdAt: new Date() } as UserSentence);
+}
+
+export async function getSentencesForWord(wordId: number): Promise<UserSentence[]> {
+  return db.userSentences.where("wordId").equals(wordId).toArray();
+}
+
+export async function getAllUserSentences(): Promise<UserSentence[]> {
+  const sentences = await db.userSentences.toArray();
+  return sentences.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+}
+
+// ---------------------------------------------------------------------------
+// Daily word selection
+// ---------------------------------------------------------------------------
+
+function curatedToWord(cw: CuratedWord): Word {
+  return {
+    word: cw.word,
+    phonetics: [],
+    meanings: [
+      {
+        partOfSpeech: cw.partOfSpeech,
+        definitions: [{ definition: cw.definition, synonyms: cw.synonyms, antonyms: cw.antonyms }],
+        synonyms: cw.synonyms,
+        antonyms: cw.antonyms,
+      },
+    ],
+    sourceUrls: [],
+    searchedAt: new Date(),
+    reviewCount: 0,
+    correctCount: 0,
+    incorrectCount: 0,
+    allSynonyms: cw.synonyms,
+    allAntonyms: cw.antonyms,
+    allExamples: [],
+    primaryDefinition: cw.definition,
+    primaryPartOfSpeech: cw.partOfSpeech,
+    inBank: 0,
+  };
+}
+
+export async function getDailyWord(): Promise<Word | null> {
+  const today = getTodayString();
+  const key = `vocabuild_daily_word_${today}`;
+  const cached = localStorage.getItem(key);
+
+  if (cached) {
+    const word = await db.words.where("word").equals(cached).first();
+    if (word) return word;
+    // Word was removed from DB — fall through and pick a new one
+  }
+
+  const bankWords = await db.words.where("inBank").equals(1).toArray();
+
+  if (bankWords.length > 0) {
+    const allSentences = await db.userSentences.toArray();
+    const wordsWithSentences = new Set(allSentences.map((s) => s.wordId));
+    const withoutSentences = bankWords.filter(
+      (w) => w.id !== undefined && !wordsWithSentences.has(w.id!)
+    );
+    const pool = withoutSentences.length > 0 ? withoutSentences : bankWords;
+    pool.sort((a, b) => {
+      const aTime = a.lastReviewedAt?.getTime() ?? a.searchedAt.getTime();
+      const bTime = b.lastReviewedAt?.getTime() ?? b.searchedAt.getTime();
+      return aTime - bTime;
+    });
+    const chosen = pool[0];
+    localStorage.setItem(key, chosen.word);
+    return chosen;
+  }
+
+  // No bank words — fall back to a curated word seeded by today's date
+  const allCurated = getRandomCuratedWords(50, []);
+  const dateHash = today.split("-").reduce((acc, n) => acc + parseInt(n), 0);
+  const cw = allCurated[dateHash % allCurated.length];
+  localStorage.setItem(key, cw.word);
+  return curatedToWord(cw);
 }

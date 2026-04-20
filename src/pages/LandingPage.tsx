@@ -10,6 +10,9 @@ import {
   RefreshCw,
   Shield,
   MessageSquareHeart,
+  CalendarDays,
+  PenLine,
+  CheckCircle2,
 } from "lucide-react";
 import { WordCard } from "@/components/search/WordCard";
 import { FeedbackFAB, FeedbackFormBody } from "@/components/common/FeedbackFAB";
@@ -370,7 +373,7 @@ export function LandingPage() {
             { icon: BookOpen, text: "Look up any word instantly" },
             { icon: Layers, text: "12 curated exam decks" },
             { icon: RefreshCw, text: "Spaced-repetition quizzes" },
-            { icon: Shield, text: "100% private & offline" },
+            { icon: CalendarDays, text: "Daily quiz & sentence challenge" },
           ].map(({ icon: Icon, text }, i) => (
             <div
               key={text}
@@ -456,6 +459,98 @@ export function LandingPage() {
                 <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Daily Habits section ── */}
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-10 text-center">
+            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
+              A little every day goes a long way
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Two daily habits that turn passive exposure into active memory.
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            {/* Daily Quiz demo */}
+            <div className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <CalendarDays className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Daily Quiz</h3>
+                  <p className="text-xs text-muted-foreground">5 words · ~2 minutes</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Every day, get 5 practice words — a mix from your bank and new vocabulary.
+                Quick, mixed-mode questions keep things sharp without taking over your morning.
+              </p>
+              {/* Static mockup */}
+              <div className="rounded-xl border bg-muted/30 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Today's quiz</span>
+                  <span className="text-xs font-medium text-primary">3 / 5</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full w-3/5 rounded-full bg-primary" />
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 pt-1">
+                  {[true, true, true, false, null].map((correct, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "flex h-7 items-center justify-center rounded-lg text-xs font-medium",
+                        correct === true && "bg-success/10 text-success",
+                        correct === false && "bg-destructive/10 text-destructive",
+                        correct === null && "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {correct === true ? <Check className="h-3.5 w-3.5" /> : correct === false ? <X className="h-3.5 w-3.5" /> : "·"}
+                    </div>
+                  ))}
+                  <div className="col-span-3 flex h-7 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">
+                    · · ·
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Use in Sentence demo */}
+            <div className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-chart-2/10">
+                  <PenLine className="h-5 w-5 text-chart-2" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">Use in a Sentence</h3>
+                  <p className="text-xs text-muted-foreground">One word · daily challenge + cards</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Every definition card has a sentence box. Write the word in context — use it, own it.
+                A daily word challenge picks one word from your bank so you build a sentence log over time.
+              </p>
+              {/* Static mockup */}
+              <div className="rounded-xl border bg-muted/30 p-3 space-y-2.5">
+                <div className="space-y-0.5">
+                  <p className="text-xs font-semibold text-foreground">ephemeral</p>
+                  <p className="text-[11px] text-muted-foreground">adj. Lasting for a very short time.</p>
+                </div>
+                <div className="rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground/60">
+                  The ephemeral nature of social media…
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-success font-medium">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Saved to your sentence log
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

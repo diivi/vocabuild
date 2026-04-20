@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Brain,
   BookOpen,
@@ -10,6 +10,8 @@ import {
   Info,
   CheckCircle2,
   Clock,
+  CalendarDays,
+  PenLine,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ContributionChart } from "@/components/review/ContributionChart";
@@ -17,13 +19,24 @@ import { QuizRunner, type QuizResult } from "@/components/review/QuizRunner";
 import { QuizResults } from "@/components/review/QuizResults";
 import {
   generateQuiz,
+  generateDailyQuiz,
   type QuizType,
   type QuizQuestion,
 } from "@/lib/quiz/quiz-engine";
-import { getQuizStats, getWordCount } from "@/lib/db-operations";
+import {
+  getQuizStats,
+  getWordCount,
+  getDailyWord,
+  getTodayString,
+  addUserSentence,
+} from "@/lib/db-operations";
 import { cn } from "@/lib/utils";
+import type { Word } from "@/lib/db";
 
 type QuizState = "menu" | "playing" | "results";
+
+const DAILY_QUIZ_KEY = (date: string) => `vocabuild_daily_quiz_${date}`;
+const DAILY_SENTENCE_KEY = (date: string) => `vocabuild_daily_sentence_${date}`;
 
 export function ReviewTab() {
   const [quizState, setQuizState] = useState<QuizState>("menu");
@@ -41,8 +54,19 @@ export function ReviewTab() {
   });
   const [wordCount, setWordCount] = useState(0);
 
+  // Daily quiz state
+  const isDailyQuizRef = useRef(false);
+  const [dailyQuizResult, setDailyQuizResult] = useState<{ score: number; total: number } | null>(null);
+
+  // Daily word / sentence state
+  const [dailyWord, setDailyWord] = useState<Word | null>(null);
+  const [dailyWordInput, setDailyWordInput] = useState("");
+  const [dailyWordDone, setDailyWordDone] = useState<string | null>(null);
+  const [dailySentenceStatus, setDailySentenceStatus] = useState<"idle" | "saving">("idle");
+
   useEffect(() => {
     loadStats();
+    loadDailyState();
   }, []);
 
   const loadStats = async () => {
@@ -51,9 +75,32 @@ export function ReviewTab() {
     setWordCount(await getWordCount());
   };
 
+  const loadDailyState = async () => {
+    const today = getTodayString();
+
+    const quizData = localStorage.getItem(DAILY_QUIZ_KEY(today));
+    if (quizData) setDailyQuizResult(JSON.parse(quizData));
+
+    const sentenceData = localStorage.getItem(DAILY_SENTENCE_KEY(today));
+    if (sentenceData) setDailyWordDone(sentenceData);
+
+    const word = await getDailyWord();
+    setDailyWord(word);
+  };
+
   const startQuiz = async (type: QuizType | "mixed") => {
     const q = await generateQuiz(type, 10);
     if (q.length === 0) return;
+    isDailyQuizRef.current = false;
+    setQuestions(q);
+    setResults([]);
+    setQuizState("playing");
+  };
+
+  const startDailyQuiz = async () => {
+    const q = await generateDailyQuiz();
+    if (q.length === 0) return;
+    isDailyQuizRef.current = true;
     setQuestions(q);
     setResults([]);
     setQuizState("playing");
@@ -62,6 +109,16 @@ export function ReviewTab() {
   const handleFinish = async (r: QuizResult[]) => {
     setResults(r);
     setQuizState("results");
+
+    if (isDailyQuizRef.current) {
+      isDailyQuizRef.current = false;
+      const correct = r.filter((res) => res.isCorrect).length;
+      const result = { score: correct, total: r.length };
+      const today = getTodayString();
+      localStorage.setItem(DAILY_QUIZ_KEY(today), JSON.stringify(result));
+      setDailyQuizResult(result);
+    }
+
     await loadStats();
   };
 
@@ -73,9 +130,31 @@ export function ReviewTab() {
   };
 
   const backToMenu = () => {
+    isDailyQuizRef.current = false;
     setQuizState("menu");
     loadStats();
   };
+
+  const isDailyWordSentenceValid =
+    dailyWord !== null &&
+    dailyWordInput.trim().length >= dailyWord.word.length + 3 &&
+    dailyWordInput.toLowerCase().includes(dailyWord.word.toLowerCase());
+
+  const submitDailySentence = useCallback(async () => {
+    if (!dailyWord || !isDailyWordSentenceValid) return;
+    setDailySentenceStatus("saving");
+    const sentence = dailyWordInput.trim();
+    await addUserSentence({
+      wordId: dailyWord.id ?? 0,
+      word: dailyWord.word,
+      sentence,
+      isDailyChallenge: true,
+    });
+    const today = getTodayString();
+    localStorage.setItem(DAILY_SENTENCE_KEY(today), sentence);
+    setDailyWordDone(sentence);
+    setDailySentenceStatus("idle");
+  }, [dailyWord, dailyWordInput, isDailyWordSentenceValid]);
 
   if (quizState === "playing" && questions.length > 0) {
     return (
@@ -101,6 +180,97 @@ export function ReviewTab() {
       <div>
         <h1 className="text-xl font-bold text-foreground">Review</h1>
         <p className="mt-0.5 text-xs text-muted-foreground">Your saved word bank</p>
+      </div>
+
+      {/* ── Daily Challenges ── */}
+      <div className="space-y-2.5">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Today's challenges
+          </p>
+
+          {/* Daily Quiz */}
+          <div className="rounded-xl border bg-card p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                  <CalendarDays className="h-4.5 w-4.5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Daily Quiz</p>
+                  <p className="text-xs text-muted-foreground">
+                    {dailyQuizResult
+                      ? `${dailyQuizResult.score}/${dailyQuizResult.total} correct`
+                      : "5 mixed questions · ~2 min"}
+                  </p>
+                </div>
+              </div>
+              {dailyQuizResult ? (
+                <div className="flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Done
+                </div>
+              ) : (
+                <button
+                  onClick={startDailyQuiz}
+                  className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90 active:scale-95"
+                >
+                  Start
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Word of the Day */}
+          {dailyWord && (
+            <div className="rounded-xl border bg-card p-4 space-y-3">
+              <div className="flex items-start gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-chart-2/10">
+                  <PenLine className="h-4.5 w-4.5 text-chart-2" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground">Word of the Day</p>
+                  <p className="text-xs text-muted-foreground">
+                    Use <span className="font-medium text-foreground">{dailyWord.word}</span> in a sentence
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground/70 line-clamp-1">
+                    {dailyWord.primaryDefinition}
+                  </p>
+                </div>
+              </div>
+
+              {dailyWordDone ? (
+                <div className="rounded-lg bg-success/10 p-3">
+                  <p className="text-xs text-success font-medium mb-1 flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Saved for today
+                  </p>
+                  <p className="text-sm text-foreground/80 italic">"{dailyWordDone}"</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <textarea
+                    value={dailyWordInput}
+                    onChange={(e) => setDailyWordInput(e.target.value)}
+                    placeholder={`Write a sentence using "${dailyWord.word}"…`}
+                    rows={2}
+                    className="w-full resize-none rounded-lg border border-input bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40"
+                  />
+                  <button
+                    onClick={submitDailySentence}
+                    disabled={!isDailyWordSentenceValid || dailySentenceStatus === "saving"}
+                    className={cn(
+                      "w-full rounded-lg py-2 text-xs font-semibold transition-colors",
+                      isDailyWordSentenceValid
+                        ? "bg-chart-2 text-white hover:opacity-90"
+                        : "bg-muted text-muted-foreground/50 cursor-not-allowed"
+                    )}
+                  >
+                    Save sentence
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
       </div>
 
       <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
