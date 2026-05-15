@@ -44,6 +44,12 @@ export interface Word {
    * Stored as 0/1 so Dexie can index it.
    */
   inBank: 0 | 1;
+  /**
+   * Entry comes from a phrase deck (idiom, phrasal verb, foreign expression).
+   * Phrase rows have a baked-in definition and never hit the dictionary API.
+   * Stored as 0/1 so Dexie can index it.
+   */
+  isPhrase?: 0 | 1;
 }
 
 export interface QuizAttempt {
@@ -156,6 +162,21 @@ class VocaBuildDB extends Dexie {
       deckProgress: "++id, &deckId, lastOpenedAt",
       userSentences: "++id, wordId, word, createdAt",
     });
+
+    // v6: add isPhrase flag so phrase-deck entries can be distinguished from
+    // dictionary words (no audio/phonetics, meaning-only quizzes).
+    this.version(6)
+      .stores({
+        words: "++id, &word, inBank, isPhrase, searchedAt, lastReviewedAt, reviewCount",
+        quizAttempts: "++id, sessionId, wordId, quizType, attemptedAt",
+        customDecks: "++id, &deckId, createdAt",
+        deckProgress: "++id, &deckId, lastOpenedAt",
+        userSentences: "++id, wordId, word, createdAt",
+      })
+      .upgrade(async (tx) => {
+        // Everything pre-v6 was a dictionary word.
+        await tx.table("words").toCollection().modify({ isPhrase: 0 });
+      });
   }
 }
 

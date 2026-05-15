@@ -5,277 +5,278 @@ description: Latin, French, German, and other loanwords commonly used in English
 category: Literary
 emoji: 🗺️
 source: Oxford Dictionary of Foreign Words and Phrases
+kind: phrases
 ---
 
-ad hoc
-ad infinitum
-ad nauseam
-ad libitum
-affaire de coeur
-aficionado
-al dente
-al fresco
-alma mater
-alter ego
-amour propre
-ancien régime
-angst
-apropos
-a priori
-a posteriori
-au courant
-au fait
-au naturel
-au revoir
-avant-garde
-ave atque vale
-beau monde
-belles-lettres
-bête noire
-bildungsroman
-blasé
-bona fide
-bon mot
-bon vivant
-bon voyage
-bonhomie
-bourgeois
-caballero
-cabaret
-café au lait
-camaraderie
-canapé
-carpe diem
-casus belli
-cause célèbre
-caveat
-caveat emptor
-chacun à son goût
-chef d'oeuvre
-chic
-chutzpah
-cliché
-coiffure
-comme ci, comme ça
-comme il faut
-compos mentis
-connoisseur
-contretemps
-corpus delicti
-coup de grâce
-coup d'état
-crème de la crème
-cui bono
-cum laude
-curriculum vitae
-de facto
-de jure
-déjà vu
-dénouement
-de novo
-deo volente
-déshabillé
-détente
-deus ex machina
-dolce vita
-doppelgänger
-double entendre
-ecce homo
-élan
-el dorado
-embarras de richesses
-embarras du choix
-émigré
-en bloc
-en masse
-en passant
-en route
-enfant terrible
-ennui
-entente
-entrée
-entrepreneur
-entourage
-ergo
-ersatz
-erratum
-esprit de corps
-et cetera
-et tu, Brute
-ex cathedra
-ex gratia
-ex officio
-ex post facto
-ex tempore
-façade
-fait accompli
-faute de mieux
-faux pas
-femme fatale
-fiancé
-fiasco
-flair
-force majeure
-gaffe
-gauche
-gemütlichkeit
-genre
-gestalt
-glasnost
-gourmand
-gourmet
-gravitas
-haiku
-hauteur
-haute couture
-haute cuisine
-hegira
-hoi polloi
-honcho
-horror vacui
-hubris
-idée fixe
-impasse
-imprimatur
-in absentia
-in camera
-in extremis
-in flagrante delicto
-in loco parentis
-in medias res
-in perpetuum
-in situ
-in toto
-in vino veritas
-in vitro
-inamorata
-infra dig
-ingénue
-intelligentsia
-ipso facto
-je ne sais quoi
-joie de vivre
-karma
-kindergarten
-kitsch
-kvetch
-la dolce vita
-laissez-faire
-leitmotif
-lingua franca
-literati
-magnum opus
-maître d'hôtel
-mal de mer
-manqué
-mañana
-mea culpa
-memento mori
-ménage à trois
-mens sana in corpore sano
-milieu
-modus operandi
-modus vivendi
-mot juste
-nolens volens
-nom de guerre
-nom de plume
-non compos mentis
-non sequitur
-nouveau riche
-nouvelle cuisine
-nuance
-omerta
-outré
-panache
-par excellence
-par exemple
-passé
-pastiche
-pater familias
-paterfamilias
-patois
-pax romana
-peccadillo
-per annum
-per capita
-per diem
-per se
-persona non grata
-pièce de résistance
-piece de résistance
-piquant
-pizzazz
-poco a poco
-poseur
-post hoc
-post mortem
-pot-au-feu
-pour le sport
-précis
-prima donna
-prima facie
-primus inter pares
-pro bono
-pro forma
-pro rata
-pro tem
-pro tempore
-quid pro quo
-qui vive
-raconteur
-raison d'être
-rapport
-rapprochement
-realpolitik
-reductio ad absurdum
-rendezvous
-répondez s'il vous plaît
-revenant
-risqué
-roué
-sangfroid
-sang-froid
-savant
-savoir-faire
-savoir-vivre
-schadenfreude
-schlemiel
-schmaltz
-sic
-sic transit gloria mundi
-sine die
-sine qua non
-sobriquet
-soi-disant
-soirée
-sotto voce
-status quo
-sturm und drang
-sub rosa
-sui generis
-summa cum laude
-table d'hôte
-tabula rasa
-tant pis
-tempus fugit
-terra firma
-terra incognita
-tête-à-tête
-touché
-tour de force
-tout de suite
-ultra vires
-vade mecum
-veni, vidi, vici
-verboten
-vice versa
-vignette
-vis-à-vis
-viz
-volte-face
-wanderlust
-weltanschauung
-weltschmerz
-wunderkind
-zeitgeist
+ad hoc :: created or done for a specific purpose only, not part of a general plan (Latin)
+ad infinitum :: continuing forever without end (Latin)
+ad nauseam :: to a tiresome or sickening degree of repetition (Latin)
+ad libitum :: at one's pleasure; improvised, as needed (Latin)
+affaire de coeur :: a love affair; a matter of the heart (French)
+aficionado :: an enthusiastic devotee or admirer of an activity (Spanish)
+al dente :: cooked just firm enough to retain a bite, used of pasta (Italian)
+al fresco :: in the open air; outdoors (Italian)
+alma mater :: the school, college, or university one attended (Latin)
+alter ego :: a second self; a trusted friend or alternate persona (Latin)
+amour propre :: self-respect; sense of one's own worth (French)
+ancien régime :: a former, often discredited political or social system (French)
+angst :: a deep feeling of anxiety, dread, or insecurity (German)
+apropos :: with regard to; appropriate to the situation (French)
+a priori :: based on theoretical deduction rather than observation (Latin)
+a posteriori :: based on observation or experience rather than theory (Latin)
+au courant :: well-informed; up to date on current affairs (French)
+au fait :: thoroughly familiar with or knowledgeable about something (French)
+au naturel :: in the natural state; uncooked, unadorned, or nude (French)
+au revoir :: goodbye; until we meet again (French)
+avant-garde :: innovative or experimental, especially in the arts (French)
+ave atque vale :: hail and farewell; a parting greeting (Latin)
+beau monde :: fashionable society; the world of high society (French)
+belles-lettres :: literature regarded for its aesthetic rather than informational value (French)
+bête noire :: a person or thing one particularly dislikes or fears (French)
+bildungsroman :: a novel dealing with one's formative years and education (German)
+blasé :: unimpressed because of familiarity; world-weary (French)
+bona fide :: genuine; in good faith (Latin)
+bon mot :: a clever or witty remark (French)
+bon vivant :: a person who enjoys a sociable, luxurious lifestyle (French)
+bon voyage :: have a good trip; safe travels (French)
+bonhomie :: cheerful friendliness; geniality (French)
+bourgeois :: belonging to or typical of the middle class; conventional (French)
+caballero :: a Spanish gentleman or skilled horseman (Spanish)
+cabaret :: a venue offering entertainment with food and drink (French)
+café au lait :: coffee served with hot milk (French)
+camaraderie :: mutual trust and friendship among close companions (French)
+canapé :: a small piece of bread or pastry with a savory topping (French)
+carpe diem :: seize the day; make the most of the present (Latin)
+casus belli :: an act or event that justifies or causes war (Latin)
+cause célèbre :: a controversial issue or sensational legal case (French)
+caveat :: a warning or proviso of specific conditions (Latin)
+caveat emptor :: let the buyer beware (Latin)
+chacun à son goût :: each to his own taste (French)
+chef d'oeuvre :: a masterpiece, especially of art or literature (French)
+chic :: elegantly fashionable in style or manner (French)
+chutzpah :: bold audacity or impudent self-confidence (Yiddish)
+cliché :: a phrase or idea overused to the point of triteness (French)
+coiffure :: a hairstyle, especially an elaborate one (French)
+comme ci, comme ça :: so-so; neither very good nor very bad (French)
+comme il faut :: as it should be; proper, in accord with etiquette (French)
+compos mentis :: of sound mind; mentally competent (Latin)
+connoisseur :: an expert judge in matters of taste, especially the fine arts (French)
+contretemps :: an inconvenient occurrence or minor dispute (French)
+corpus delicti :: the body of evidence proving a crime was committed (Latin)
+coup de grâce :: a finishing blow that ends suffering or struggle (French)
+coup d'état :: a sudden, illegal seizure of government power (French)
+crème de la crème :: the very best of a kind; the elite (French)
+cui bono :: who benefits? — asking who profits from an act (Latin)
+cum laude :: with praise; an academic honor for distinguished work (Latin)
+curriculum vitae :: a written summary of one's education and experience (Latin)
+de facto :: existing in fact, whether by right or not (Latin)
+de jure :: according to law; rightfully (Latin)
+déjà vu :: the feeling of having previously experienced the present moment (French)
+dénouement :: the final resolution of a plot or complicated situation (French)
+de novo :: starting from the beginning; anew (Latin)
+deo volente :: God willing (Latin)
+déshabillé :: the state of being partly or carelessly dressed (French)
+détente :: the easing of hostility or strained relations (French)
+deus ex machina :: an unexpected, contrived solution that resolves a plot (Latin)
+dolce vita :: a life of pleasant indulgence and luxury (Italian)
+doppelgänger :: a person who looks remarkably like another; a ghostly double (German)
+double entendre :: a phrase with two meanings, one usually risqué (French)
+ecce homo :: behold the man — Pilate's words on presenting Jesus (Latin)
+élan :: vigorous spirit or enthusiasm; flair (French)
+el dorado :: a place of legendary wealth or great opportunity (Spanish)
+embarras de richesses :: an embarrassment of riches; too many good choices (French)
+embarras du choix :: too many choices to easily decide between (French)
+émigré :: a person who has left their country, usually for political reasons (French)
+en bloc :: as a whole; all together (French)
+en masse :: in a group; all together (French)
+en passant :: in passing; by the way (French)
+en route :: on the way to a destination (French)
+enfant terrible :: a person whose unconventional behavior shocks or embarrasses (French)
+ennui :: a feeling of listlessness or boredom from inactivity (French)
+entente :: a friendly understanding or informal agreement between states (French)
+entrée :: the main course of a meal; an entrance (French)
+entrepreneur :: a person who organizes and runs a business, taking on risk (French)
+entourage :: a group of attendants accompanying an important person (French)
+ergo :: therefore; consequently (Latin)
+ersatz :: an artificial substitute, usually inferior to the original (German)
+erratum :: an error in printing or writing, listed for correction (Latin)
+esprit de corps :: a feeling of pride and loyalty shared by group members (French)
+et cetera :: and other similar things; and so on (Latin)
+et tu, Brute :: a reproach to an unexpected betrayer (Latin)
+ex cathedra :: with the full authority of office, especially the Pope (Latin)
+ex gratia :: as a favor, not from legal obligation (Latin)
+ex officio :: by virtue of one's position or office (Latin)
+ex post facto :: with retroactive effect or force (Latin)
+ex tempore :: spoken or done without preparation; impromptu (Latin)
+façade :: the front of a building; a deceptive outward appearance (French)
+fait accompli :: an accomplished fact; a done deal that cannot be reversed (French)
+faute de mieux :: for lack of anything better (French)
+faux pas :: an embarrassing social blunder (French)
+femme fatale :: an alluring, dangerous woman who leads men into peril (French)
+fiancé :: a man engaged to be married (French)
+fiasco :: a complete and humiliating failure (Italian)
+flair :: a natural talent or stylish elegance (French)
+force majeure :: an unforeseeable event excusing contractual performance (French)
+gaffe :: an embarrassing blunder or social mistake (French)
+gauche :: lacking ease or grace; unsophisticated, awkward (French)
+gemütlichkeit :: a feeling of warm coziness, friendliness, and good cheer (German)
+genre :: a category of artistic, literary, or musical work (French)
+gestalt :: an organized whole perceived as more than the sum of its parts (German)
+glasnost :: a policy of openness in government and discussion (Russian)
+gourmand :: a person devoted to eating, often to excess (French)
+gourmet :: a connoisseur of fine food and drink (French)
+gravitas :: dignity, seriousness, or solemnity of manner (Latin)
+haiku :: a Japanese poem of three lines in a 5-7-5 syllable pattern (Japanese)
+hauteur :: haughty, disdainful manner or attitude (French)
+haute couture :: high-fashion design and dressmaking (French)
+haute cuisine :: elaborate, high-quality cooking (French)
+hegira :: a journey to escape danger; the flight of Muhammad to Medina (Arabic)
+hoi polloi :: the common people; the masses (Greek)
+honcho :: the person in charge; the leader (Japanese)
+horror vacui :: fear of empty spaces; tendency to fill every gap (Latin)
+hubris :: excessive pride or self-confidence leading to downfall (Greek)
+idée fixe :: a fixed idea or obsession that dominates the mind (French)
+impasse :: a situation in which no progress is possible; deadlock (French)
+imprimatur :: official approval or sanction to print or proceed (Latin)
+in absentia :: while absent; without being present (Latin)
+in camera :: in private; not in open court (Latin)
+in extremis :: in extreme circumstances, especially near death (Latin)
+in flagrante delicto :: caught in the act of wrongdoing (Latin)
+in loco parentis :: in the position of a parent (Latin)
+in medias res :: into the middle of things; starting in mid-action (Latin)
+in perpetuum :: forever; in perpetuity (Latin)
+in situ :: in the original or natural place or position (Latin)
+in toto :: as a whole; entirely (Latin)
+in vino veritas :: in wine there is truth — alcohol loosens tongues (Latin)
+in vitro :: performed in a test tube or controlled environment outside a body (Latin)
+inamorata :: a woman with whom one is in love (Italian)
+infra dig :: beneath one's dignity (Latin)
+ingénue :: an innocent, naive young woman, especially as a stock character (French)
+intelligentsia :: the educated, intellectual class of a society (Russian)
+ipso facto :: by that very fact or act (Latin)
+je ne sais quoi :: an indefinable, attractive quality (French)
+joie de vivre :: an exuberant enjoyment of life (French)
+karma :: the spiritual principle that one's actions shape one's future (Sanskrit)
+kindergarten :: a school or class for young children (German)
+kitsch :: art or design considered tacky, sentimental, or in poor taste (German)
+kvetch :: to complain habitually; a habitual complainer (Yiddish)
+la dolce vita :: the sweet life; a life of pleasure and indulgence (Italian)
+laissez-faire :: a policy of minimal interference, especially in economic affairs (French)
+leitmotif :: a recurring theme associated with a person or idea (German)
+lingua franca :: a common language used between speakers of different tongues (Italian)
+literati :: well-educated people interested in literature (Latin)
+magnum opus :: the greatest work of an artist, writer, or composer (Latin)
+maître d'hôtel :: the head waiter or manager of a restaurant (French)
+mal de mer :: seasickness (French)
+manqué :: having failed to become what one might have been; would-be (French)
+mañana :: tomorrow, or an indefinite future time (Spanish)
+mea culpa :: an acknowledgment of one's own fault (Latin)
+memento mori :: a reminder that death is inevitable (Latin)
+ménage à trois :: a sexual or domestic arrangement among three people (French)
+mens sana in corpore sano :: a sound mind in a sound body (Latin)
+milieu :: a person's social environment or setting (French)
+modus operandi :: a particular way or method of doing something (Latin)
+modus vivendi :: a practical arrangement allowing parties to coexist (Latin)
+mot juste :: exactly the right word for the situation (French)
+nolens volens :: whether willing or not; willy-nilly (Latin)
+nom de guerre :: an assumed name under which one fights or acts (French)
+nom de plume :: a pen name used by an author (French)
+non compos mentis :: not of sound mind; not legally responsible (Latin)
+non sequitur :: a statement that doesn't logically follow from the previous one (Latin)
+nouveau riche :: people who have recently acquired wealth, often ostentatious (French)
+nouvelle cuisine :: a modern style of cooking emphasizing light dishes (French)
+nuance :: a subtle distinction or shade of meaning (French)
+omerta :: a code of silence about criminal activity (Italian)
+outré :: unusual and startling; unconventional (French)
+panache :: distinctive, stylish flamboyance of manner (French)
+par excellence :: better or more than all others of the same kind (French)
+par exemple :: for example (French)
+passé :: out of fashion; outdated (French)
+pastiche :: an artistic work imitating the style of another (French)
+pater familias :: the male head of a household (Latin)
+paterfamilias :: the male head of a household (Latin)
+patois :: a regional dialect, especially of nonstandard speech (French)
+pax romana :: the long peace imposed by Rome on its empire (Latin)
+peccadillo :: a small, relatively unimportant offense or sin (Spanish)
+per annum :: per year; annually (Latin)
+per capita :: per person; for each individual (Latin)
+per diem :: per day; a daily allowance (Latin)
+per se :: by itself; intrinsically (Latin)
+persona non grata :: an unwelcome person, especially in diplomatic contexts (Latin)
+pièce de résistance :: the most impressive item in a series or collection (French)
+piece de résistance :: the most impressive item in a series or collection (French)
+piquant :: pleasantly sharp or stimulating to the taste or mind (French)
+pizzazz :: an attractive combination of vitality and glamour (English of unknown origin)
+poco a poco :: little by little; gradually (Italian)
+poseur :: a person who pretends to be what they are not, to impress others (French)
+post hoc :: after this — often shorthand for a fallacy of false causation (Latin)
+post mortem :: after death; an examination or review after an event (Latin)
+pot-au-feu :: a traditional French stew of beef and vegetables (French)
+pour le sport :: for the sport or fun of it (French)
+précis :: a concise summary of a longer text (French)
+prima donna :: the leading female singer in opera; a temperamental person (Italian)
+prima facie :: at first sight; based on first impression (Latin)
+primus inter pares :: first among equals (Latin)
+pro bono :: done without charge for the public good (Latin)
+pro forma :: done as a formality; for the sake of form (Latin)
+pro rata :: in proportion; proportionally (Latin)
+pro tem :: for the time being; temporarily (Latin)
+pro tempore :: for the time being; temporarily (Latin)
+quid pro quo :: something given in exchange for something else (Latin)
+qui vive :: on the alert; on the lookout (French)
+raconteur :: a skilled storyteller (French)
+raison d'être :: the reason or justification for something's existence (French)
+rapport :: a close, harmonious relationship of mutual understanding (French)
+rapprochement :: a restoration of friendly relations between states or parties (French)
+realpolitik :: politics based on practical considerations rather than ideology (German)
+reductio ad absurdum :: disproving an argument by showing it leads to an absurd conclusion (Latin)
+rendezvous :: a meeting at an agreed time and place (French)
+répondez s'il vous plaît :: please reply — abbreviated RSVP (French)
+revenant :: one who returns, especially supposedly from the dead (French)
+risqué :: slightly indecent or suggestive (French)
+roué :: a debauched, dissolute man (French)
+sangfroid :: composure under strain; cool self-possession (French)
+sang-froid :: composure under strain; cool self-possession (French)
+savant :: a learned person, especially one with prodigious skill (French)
+savoir-faire :: the ability to act appropriately in social situations (French)
+savoir-vivre :: knowledge of the rules of polite society; good breeding (French)
+schadenfreude :: pleasure derived from another person's misfortune (German)
+schlemiel :: a clumsy, inept person; a habitual bungler (Yiddish)
+schmaltz :: excessive sentimentality, especially in music or art (Yiddish)
+sic :: thus, written so — used to mark a quoted error as accurate (Latin)
+sic transit gloria mundi :: thus passes the glory of the world (Latin)
+sine die :: without a day fixed for a future meeting; indefinitely (Latin)
+sine qua non :: an essential condition without which something cannot exist (Latin)
+sobriquet :: a person's nickname or familiar epithet (French)
+soi-disant :: self-styled; so-called (French)
+soirée :: an evening social gathering, often with entertainment (French)
+sotto voce :: in a quiet voice; under one's breath (Italian)
+status quo :: the existing state of affairs (Latin)
+sturm und drang :: turmoil; emotional upheaval (German)
+sub rosa :: in secret; confidentially (Latin)
+sui generis :: of its own kind; unique (Latin)
+summa cum laude :: with highest praise; the top academic honor (Latin)
+table d'hôte :: a restaurant meal served at a fixed time and price (French)
+tabula rasa :: a blank slate; the mind before experience (Latin)
+tant pis :: too bad; oh well (French)
+tempus fugit :: time flies (Latin)
+terra firma :: solid ground; dry land (Latin)
+terra incognita :: unknown or unexplored territory (Latin)
+tête-à-tête :: a private conversation between two people (French)
+touché :: an acknowledgment of a hit in fencing or a clever point in argument (French)
+tour de force :: a remarkable feat of strength, skill, or ingenuity (French)
+tout de suite :: immediately; right away (French)
+ultra vires :: beyond one's legal power or authority (Latin)
+vade mecum :: a handbook or guide kept constantly at hand (Latin)
+veni, vidi, vici :: I came, I saw, I conquered (Latin)
+verboten :: forbidden, especially by an authority (German)
+vice versa :: the order reversed; conversely (Latin)
+vignette :: a brief, evocative description or scene (French)
+vis-à-vis :: in relation to; face to face with (French)
+viz :: namely; that is to say (Latin, from videlicet)
+volte-face :: a complete reversal of opinion or position (French)
+wanderlust :: a strong desire to travel (German)
+weltanschauung :: a comprehensive worldview or philosophy of life (German)
+weltschmerz :: world-weariness; sadness at the state of the world (German)
+wunderkind :: a child or young person of remarkable talent (German)
+zeitgeist :: the defining spirit or mood of a particular period (German)

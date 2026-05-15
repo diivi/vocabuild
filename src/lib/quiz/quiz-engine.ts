@@ -1,5 +1,9 @@
 import { shuffleArray } from "@/lib/utils";
-import { getWordsForReview, getAllWords } from "@/lib/db-operations";
+import {
+  getWordsForReview,
+  getAllWords,
+  nextReviewDate,
+} from "@/lib/db-operations";
 import { getRandomCuratedWords, type CuratedWord } from "./curated-words";
 import { db, type Word } from "@/lib/db";
 
@@ -169,122 +173,6 @@ function collectDistractorWords(
   return shuffleArray([...new Set(pool)]);
 }
 
-export async function generateQuiz(
-  type: QuizType | "mixed",
-  count: number = 10
-): Promise<QuizQuestion[]> {
-  const reviewWords = await getWordsForReview(count);
-  const allWords = await getAllWords();
-  const existingWordStrings = allWords.map((w) => w.word);
-
-  // Add 1-2 new curated words per quiz
-  const newWordCount = Math.min(2, Math.max(1, Math.floor(count * 0.2)));
-  const curatedPool = getRandomCuratedWords(20, existingWordStrings);
-  const newWords = curatedPool.slice(0, newWordCount);
-
-  const questions: QuizQuestion[] = [];
-  const types: QuizType[] =
-    type === "mixed"
-      ? shuffleArray(["meaning", "synonym", "antonym"] as QuizType[])
-      : [type];
-
-  // Generate questions from review words
-  for (const word of reviewWords) {
-    if (questions.length >= count - newWordCount) break;
-
-    const qType = type === "mixed"
-      ? types[questions.length % types.length]
-      : type;
-
-    let question: QuizQuestion | null = null;
-
-    if (qType === "meaning") {
-      const distractors = collectDistractorDefinitions(
-        allWords,
-        curatedPool,
-        word.word
-      );
-      question = generateMeaningQuestion(word, distractors, false);
-    } else if (qType === "synonym") {
-      const synonymsToExclude = word.allSynonyms;
-      const distractors = collectDistractorWords(
-        allWords,
-        curatedPool,
-        [word.word, ...synonymsToExclude],
-        "synonym"
-      );
-      question = generateSynonymQuestion(word, distractors, false);
-    } else {
-      const antonymsToExclude = word.allAntonyms;
-      const distractors = collectDistractorWords(
-        allWords,
-        curatedPool,
-        [word.word, ...antonymsToExclude],
-        "antonym"
-      );
-      question = generateAntonymQuestion(word, distractors, false);
-    }
-
-    // Fall back to meaning if synonym/antonym unavailable
-    if (!question && qType !== "meaning") {
-      const distractors = collectDistractorDefinitions(
-        allWords,
-        curatedPool,
-        word.word
-      );
-      question = generateMeaningQuestion(word, distractors, false);
-    }
-
-    if (question) questions.push(question);
-  }
-
-  // Generate questions from new curated words
-  for (const cw of newWords) {
-    if (questions.length >= count) break;
-
-    const qType = type === "mixed" ? "meaning" : type;
-    let question: QuizQuestion | null = null;
-
-    if (qType === "meaning") {
-      const distractors = collectDistractorDefinitions(
-        allWords,
-        curatedPool,
-        cw.word
-      );
-      question = generateMeaningQuestion(cw, distractors, true);
-    } else if (qType === "synonym") {
-      const distractors = collectDistractorWords(
-        allWords,
-        curatedPool,
-        [cw.word, ...cw.synonyms],
-        "synonym"
-      );
-      question = generateSynonymQuestion(cw, distractors, true);
-    } else {
-      const distractors = collectDistractorWords(
-        allWords,
-        curatedPool,
-        [cw.word, ...cw.antonyms],
-        "antonym"
-      );
-      question = generateAntonymQuestion(cw, distractors, true);
-    }
-
-    if (!question) {
-      const distractors = collectDistractorDefinitions(
-        allWords,
-        curatedPool,
-        cw.word
-      );
-      question = generateMeaningQuestion(cw, distractors, true);
-    }
-
-    if (question) questions.push(question);
-  }
-
-  return shuffleArray(questions);
-}
-
 /** Generate a 5-question mixed quiz for the daily challenge.
  *  Always produces 5 questions by filling remaining slots from the curated pool,
  *  so it works even when the user has no bank words yet.
@@ -304,7 +192,10 @@ export async function generateDailyQuiz(): Promise<QuizQuestion[]> {
   const types: QuizType[] = shuffleArray(["meaning", "synonym", "antonym"] as QuizType[]);
 
   for (const word of bankWords.slice(0, TARGET - curatedForQuiz.length)) {
-    const qType = types[questions.length % types.length];
+    const qType =
+      word.isPhrase === 1
+        ? "meaning"
+        : types[questions.length % types.length];
     let question: QuizQuestion | null = null;
 
     if (qType === "meaning") {
@@ -328,6 +219,206 @@ export async function generateDailyQuiz(): Promise<QuizQuestion[]> {
   }
 
   return shuffleArray(questions);
+}
+
+// ---------------------------------------------------------------------------
+// Endless bank quiz session
+// ---------------------------------------------------------------------------
+
+export interface BankQuizSession {
+  /** Resolve the next question, or null when no more material is available. */
+  next(): Promise<QuizQuestion | null>;
+}
+
+/**
+ * Lazy generator for the endless Review-tab quiz.
+ *
+ * Loads the bank words + a curated pool once up front, then produces questions
+ * on demand. Avoids immediate repeats with a small ring buffer of recently-seen
+ * words. When due-for-review words are exhausted, falls back to not-yet-due
+ * bank words and occasionally injects a brand-new curated word.
+ *
+ * Returns null from next() only when there is literally nothing left to ask.
+ */
+export async function createBankQuizSession(
+  type: QuizType | "mixed"
+): Promise<BankQuizSession> {
+  // Snapshot the bank once — the session is a coherent view, not a live query.
+  const allBankWords = await db.words.where("inBank").equals(1).toArray();
+  const existingWordStrings = allBankWords.map((w) => w.word);
+
+  // Generous curated pool so we can dip in repeatedly when the bank thins out.
+  const curatedPool = getRandomCuratedWords(50, existingWordStrings);
+  const newWordPool: CuratedWord[] = [...curatedPool];
+
+  // Split bank into due vs not-due, prioritised by overdueness.
+  const now = Date.now();
+  const dueScored: { word: Word; priority: number }[] = [];
+  const extraScored: { word: Word; priority: number }[] = [];
+  for (const word of allBankWords) {
+    const dueAt = nextReviewDate(word).getTime();
+    const msOverdue = now - dueAt;
+    if (msOverdue >= 0) {
+      dueScored.push({ word, priority: msOverdue });
+    } else {
+      extraScored.push({ word, priority: -msOverdue });
+    }
+  }
+  dueScored.sort((a, b) => b.priority - a.priority);
+  extraScored.sort((a, b) => a.priority - b.priority);
+
+  let dueQueue: Word[] = dueScored.map((s) => s.word);
+  let extraQueue: Word[] = extraScored.map((s) => s.word);
+
+  const RECENT_WINDOW = Math.min(8, Math.max(2, allBankWords.length - 1));
+  const recent: string[] = [];
+
+  const rotation: QuizType[] =
+    type === "mixed"
+      ? shuffleArray(["meaning", "synonym", "antonym"] as QuizType[])
+      : [type];
+  let answered = 0;
+
+  function noteShown(word: string) {
+    recent.push(word);
+    if (recent.length > RECENT_WINDOW) recent.shift();
+  }
+
+  function pickFromQueue(queue: Word[]): Word | null {
+    // Find a word not in the recent ring buffer; if all candidates are recent,
+    // accept the first one anyway rather than starving.
+    for (let i = 0; i < queue.length; i++) {
+      const w = queue[i];
+      if (!recent.includes(w.word)) {
+        queue.splice(i, 1);
+        return w;
+      }
+    }
+    return queue.shift() ?? null;
+  }
+
+  function refillDue() {
+    // Re-shuffle the original due set so the user keeps cycling through them.
+    if (dueScored.length === 0) return;
+    dueQueue = shuffleArray(dueScored.map((s) => s.word));
+  }
+
+  function refillExtra() {
+    if (extraScored.length === 0) return;
+    extraQueue = shuffleArray(extraScored.map((s) => s.word));
+  }
+
+  function tryBuild(
+    target: Word | CuratedWord,
+    qType: QuizType,
+    isNewWord: boolean
+  ): QuizQuestion | null {
+    const exclude = target.word;
+    if (qType === "meaning") {
+      const distractors = collectDistractorDefinitions(
+        allBankWords,
+        curatedPool,
+        exclude
+      );
+      return generateMeaningQuestion(target, distractors, isNewWord);
+    }
+    if (qType === "synonym") {
+      const ownSyns =
+        "allSynonyms" in target ? target.allSynonyms : target.synonyms;
+      const distractors = collectDistractorWords(
+        allBankWords,
+        curatedPool,
+        [exclude, ...ownSyns],
+        "synonym"
+      );
+      return generateSynonymQuestion(target, distractors, isNewWord);
+    }
+    const ownAnts =
+      "allAntonyms" in target ? target.allAntonyms : target.antonyms;
+    const distractors = collectDistractorWords(
+      allBankWords,
+      curatedPool,
+      [exclude, ...ownAnts],
+      "antonym"
+    );
+    return generateAntonymQuestion(target, distractors, isNewWord);
+  }
+
+  function buildForBankWord(word: Word, baseType: QuizType): QuizQuestion | null {
+    // Phrases only have meaning-MCQs to draw from.
+    if (word.isPhrase === 1) {
+      return tryBuild(word, "meaning", false);
+    }
+    let q = tryBuild(word, baseType, false);
+    if (!q && baseType !== "meaning") {
+      // Fall back to meaning if synonym/antonym data is missing.
+      q = tryBuild(word, "meaning", false);
+    }
+    return q;
+  }
+
+  async function pickNextNewWord(): Promise<QuizQuestion | null> {
+    while (newWordPool.length > 0) {
+      const cw = newWordPool.shift()!;
+      if (recent.includes(cw.word)) continue;
+      const q = tryBuild(cw, "meaning", true);
+      if (q) {
+        noteShown(cw.word);
+        return q;
+      }
+    }
+    return null;
+  }
+
+  return {
+    async next(): Promise<QuizQuestion | null> {
+      // Pick a category based on what's available. Inject a brand-new word
+      // every ~8th question while the curated pool has fresh material.
+      const wantNew =
+        newWordPool.length > 0 && answered > 0 && answered % 8 === 0;
+
+      if (wantNew) {
+        const q = await pickNextNewWord();
+        if (q) {
+          answered++;
+          return q;
+        }
+      }
+
+      // Cycle the question-type rotation so mixed quizzes don't all feel alike.
+      const qType =
+        type === "mixed"
+          ? rotation[answered % rotation.length]
+          : type;
+
+      // Prefer due → extra → new.
+      if (dueQueue.length === 0 && dueScored.length > 0) refillDue();
+      let chosen = pickFromQueue(dueQueue);
+
+      if (!chosen) {
+        if (extraQueue.length === 0 && extraScored.length > 0) refillExtra();
+        chosen = pickFromQueue(extraQueue);
+      }
+
+      if (chosen) {
+        const q = buildForBankWord(chosen, qType);
+        if (q) {
+          noteShown(chosen.word);
+          answered++;
+          return q;
+        }
+        // If the bank word couldn't form a question, fall through to curated.
+      }
+
+      const fallback = await pickNextNewWord();
+      if (fallback) {
+        answered++;
+        return fallback;
+      }
+
+      return null;
+    },
+  };
 }
 
 /**
@@ -378,8 +469,14 @@ export async function generateQuizFromWordList(
   for (const word of selected) {
     if (questions.length >= count) break;
 
+    // Phrases (idioms, phrasal verbs, foreign expressions) only get
+    // meaning-MCQs — they have no synonyms/antonyms to draw from.
     const qType =
-      type === "mixed" ? types[questions.length % types.length] : type;
+      word.isPhrase === 1
+        ? "meaning"
+        : type === "mixed"
+          ? types[questions.length % types.length]
+          : type;
 
     let question: QuizQuestion | null = null;
 

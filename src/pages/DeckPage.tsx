@@ -29,6 +29,7 @@ import {
   prefetchDeckWords,
   type Deck,
   type DeckStats,
+  type PhraseEntry,
 } from "@/lib/decks";
 import {
   generateQuizFromWordList,
@@ -132,7 +133,13 @@ export function DeckPage() {
     setModalLoading(true);
     setModalOpen(true);
     try {
-      const { word: found, status } = await previewDeckWord(lw);
+      const phrase = deck?.kind === "phrases"
+        ? deck.entries?.find((e) => e.text === lw)
+        : undefined;
+      const { word: found, status } = await previewDeckWord(
+        lw,
+        phrase ? { phrase } : {}
+      );
       if (status === "notFound") {
         toast.error(`"${word}" isn't in the dictionary`);
         setModalOpen(false);
@@ -174,9 +181,14 @@ export function DeckPage() {
     try {
       const shuffled = [...deck.words].sort(() => Math.random() - 0.5);
       const window = shuffled.slice(0, Math.min(QUIZ_PREFETCH, shuffled.length));
+      const phraseEntries =
+        deck.kind === "phrases" && deck.entries
+          ? new Map<string, PhraseEntry>(deck.entries.map((e) => [e.text, e]))
+          : undefined;
       await prefetchDeckWords(window, {
         signal: controller.signal,
         onProgress: (p) => setQuizProgress({ done: p.processed, total: p.total }),
+        phraseEntries,
       });
       if (controller.signal.aborted) return;
       const qs = await generateQuizFromWordList(window, type, QUIZ_SIZE);

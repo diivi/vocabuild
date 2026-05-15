@@ -32,6 +32,7 @@ export function WordCard({
 }: WordCardProps) {
   const phonetic = word.phonetics.find((p) => p.text)?.text ?? "";
   const audioUrl = word.phonetics.find((p) => p.audio && p.audio.length > 0)?.audio;
+  const isPhrase = word.isPhrase === 1;
 
   const [savedSentences, setSavedSentences] = useState<UserSentence[]>([]);
   const [sentenceInput, setSentenceInput] = useState("");
@@ -124,13 +125,15 @@ export function WordCard({
               </button>
             </div>
           )}
-          <button
-            onClick={playAudio}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 active:scale-95"
-            aria-label="Play pronunciation"
-          >
-            <Volume2 className="h-5 w-5" />
-          </button>
+          {!isPhrase && (
+            <button
+              onClick={playAudio}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 active:scale-95"
+              aria-label="Play pronunciation"
+            >
+              <Volume2 className="h-5 w-5" />
+            </button>
+          )}
         </div>
       </div>
 

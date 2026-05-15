@@ -1,4 +1,4 @@
-import type { Deck, DeckMeta, DeckDifficulty } from "./types";
+import type { Deck, DeckMeta, DeckDifficulty, DeckKind, PhraseEntry } from "./types";
 
 const FRONTMATTER_RE = /^---\s*\n([\s\S]*?)\n---\s*\n?/;
 
@@ -30,6 +30,21 @@ function isDifficulty(v: string | undefined): v is DeckDifficulty {
   return v === "beginner" || v === "intermediate" || v === "advanced";
 }
 
+function isKind(v: string | undefined): v is DeckKind {
+  return v === "words" || v === "phrases";
+}
+
+/** Split a phrase deck line on `::` (with optional surrounding spaces). */
+function splitPhraseLine(line: string): [string, string, string?] | null {
+  const parts = line.split(/\s*::\s*/);
+  if (parts.length < 2) return null;
+  const text = parts[0].trim();
+  const definition = parts[1].trim();
+  if (!text || !definition) return null;
+  const example = parts[2]?.trim() || undefined;
+  return [text, definition, example];
+}
+
 /**
  * Parse a deck markdown file: YAML frontmatter + one word per line in the body.
  * Lines beginning with `#`, `>`, `-`, or `*` are treated as markdown structure and skipped.
@@ -42,7 +57,12 @@ export function parseDeckMarkdown(
   const fm = match ? parseFrontmatter(match[1]) : {};
   const body = match ? markdown.slice(match[0].length) : markdown;
 
+  const kind: DeckKind = isKind(fm.kind)
+    ? fm.kind
+    : fallback.kind ?? "words";
+
   const words: string[] = [];
+  const entries: PhraseEntry[] = [];
   const seen = new Set<string>();
 
   for (const rawLine of body.split(/\r?\n/)) {
@@ -57,13 +77,25 @@ export function parseDeckMarkdown(
       .trim();
 
     if (!cleaned) continue;
-    // Ignore lines that look like "key: value" pairs (stray frontmatter)
-    if (/^[A-Za-z][\w -]*:\s/.test(cleaned)) continue;
+    // Ignore stray frontmatter-style lines, unless this is a phrase deck where
+    // `::` is the real delimiter (so "a :: b" is content, not a key: value pair).
+    if (kind !== "phrases" && /^[A-Za-z][\w -]*:\s/.test(cleaned)) continue;
 
-    const word = cleaned.toLowerCase();
-    if (!seen.has(word)) {
-      seen.add(word);
-      words.push(word);
+    if (kind === "phrases") {
+      const parsed = splitPhraseLine(cleaned);
+      if (!parsed) continue;
+      const [text, definition, example] = parsed;
+      const key = text.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      words.push(key);
+      entries.push({ text: key, definition, example });
+    } else {
+      const word = cleaned.toLowerCase();
+      if (!seen.has(word)) {
+        seen.add(word);
+        words.push(word);
+      }
     }
   }
 
@@ -78,6 +110,8 @@ export function parseDeckMarkdown(
       ? fm.difficulty
       : fallback.difficulty,
     file: fm.file || fallback.file,
+    kind,
     words,
+    entries: kind === "phrases" ? entries : undefined,
   };
 }

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -17,30 +17,51 @@ export interface QuizResult {
 }
 
 interface QuizRunnerProps {
+  /** Initial questions. In endless mode, only the first is required; subsequent
+   *  questions are pulled via `getNext`. */
   questions: QuizQuestion[];
   onFinish: (results: QuizResult[]) => void;
   onExit?: () => void;
   title?: string;
+  /** "fixed" (default): play through `questions` then finish.
+   *  "endless": after each answered question, call `getNext()` to load the
+   *  next one. The user ends the session manually via the End button. */
+  mode?: "fixed" | "endless";
+  getNext?: () => Promise<QuizQuestion | null>;
 }
 
-export function QuizRunner({ questions, onFinish, onExit, title }: QuizRunnerProps) {
+export function QuizRunner({
+  questions: initialQuestions,
+  onFinish,
+  onExit,
+  title,
+  mode = "fixed",
+  getNext,
+}: QuizRunnerProps) {
+  const [questions, setQuestions] = useState<QuizQuestion[]>(initialQuestions);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [results, setResults] = useState<QuizResult[]>([]);
   const [isInBank, setIsInBank] = useState(false);
+  const [loadingNext, setLoadingNext] = useState(false);
   const sessionIdRef = useRef("");
 
   useEffect(() => {
     sessionIdRef.current = crypto.randomUUID();
+    setQuestions(initialQuestions);
     setCurrentIndex(0);
     setSelectedAnswer(null);
     setResults([]);
-  }, [questions]);
+  }, [initialQuestions]);
 
   if (questions.length === 0) return null;
 
   const question = questions[currentIndex];
-  const progress = ((currentIndex + (selectedAnswer ? 1 : 0)) / questions.length) * 100;
+  const endless = mode === "endless";
+  const correctSoFar = results.filter((r) => r.isCorrect).length;
+  const progress = endless
+    ? 0
+    : ((currentIndex + (selectedAnswer ? 1 : 0)) / questions.length) * 100;
   const answered = selectedAnswer !== null;
 
   const handleAnswer = async (answer: string) => {
@@ -79,7 +100,24 @@ export function QuizRunner({ questions, onFinish, onExit, title }: QuizRunnerPro
     setIsInBank(next);
   };
 
-  const next = () => {
+  const next = async () => {
+    if (endless && getNext) {
+      setLoadingNext(true);
+      try {
+        const nextQ = await getNext();
+        if (!nextQ) {
+          onFinish(results);
+          return;
+        }
+        setQuestions((qs) => [...qs, nextQ]);
+        setCurrentIndex((i) => i + 1);
+        setSelectedAnswer(null);
+        setIsInBank(false);
+      } finally {
+        setLoadingNext(false);
+      }
+      return;
+    }
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((i) => i + 1);
       setSelectedAnswer(null);
@@ -89,18 +127,24 @@ export function QuizRunner({ questions, onFinish, onExit, title }: QuizRunnerPro
     }
   };
 
+  const endSession = () => {
+    onFinish(results);
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">
           {title ? `${title} · ` : ""}
-          {currentIndex + 1} / {questions.length}
+          {endless
+            ? `Q${currentIndex + 1} · ${correctSoFar} correct`
+            : `${currentIndex + 1} / ${questions.length}`}
         </span>
         <Badge variant="outline" className="text-xs capitalize">
           {question.quizType}
         </Badge>
       </div>
-      <Progress value={progress} className="h-1.5" />
+      {!endless && <Progress value={progress} className="h-1.5" />}
 
       <div className="space-y-4 pt-2">
         {question.isNewWord && (
@@ -155,14 +199,37 @@ export function QuizRunner({ questions, onFinish, onExit, title }: QuizRunnerPro
         )}
 
         <div className="flex gap-2">
-          {onExit && (
-            <Button variant="outline" onClick={onExit} className="flex-1 rounded-xl">
-              Quit
+          {endless ? (
+            <Button
+              variant="outline"
+              onClick={endSession}
+              disabled={loadingNext}
+              className="flex-1 rounded-xl"
+            >
+              End session
             </Button>
+          ) : (
+            onExit && (
+              <Button variant="outline" onClick={onExit} className="flex-1 rounded-xl">
+                Quit
+              </Button>
+            )
           )}
           {answered && (
-            <Button onClick={next} className="flex-[2] rounded-xl">
-              {currentIndex < questions.length - 1 ? "Next" : "See Results"}
+            <Button
+              onClick={next}
+              disabled={loadingNext}
+              className="flex-[2] rounded-xl"
+            >
+              {loadingNext ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : endless ? (
+                "Next"
+              ) : currentIndex < questions.length - 1 ? (
+                "Next"
+              ) : (
+                "See Results"
+              )}
             </Button>
           )}
         </div>

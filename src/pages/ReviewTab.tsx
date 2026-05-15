@@ -18,8 +18,9 @@ import { ContributionChart } from "@/components/review/ContributionChart";
 import { QuizRunner, type QuizResult } from "@/components/review/QuizRunner";
 import { QuizResults } from "@/components/review/QuizResults";
 import {
-  generateQuiz,
+  createBankQuizSession,
   generateDailyQuiz,
+  type BankQuizSession,
   type QuizType,
   type QuizQuestion,
 } from "@/lib/quiz/quiz-engine";
@@ -34,12 +35,14 @@ import { cn } from "@/lib/utils";
 import type { Word } from "@/lib/db";
 
 type QuizState = "menu" | "playing" | "results";
+type QuizMode = "fixed" | "endless";
 
 const DAILY_QUIZ_KEY = (date: string) => `vocabuild_daily_quiz_${date}`;
 const DAILY_SENTENCE_KEY = (date: string) => `vocabuild_daily_sentence_${date}`;
 
 export function ReviewTab() {
   const [quizState, setQuizState] = useState<QuizState>("menu");
+  const [quizMode, setQuizMode] = useState<QuizMode>("fixed");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [results, setResults] = useState<QuizResult[]>([]);
   const [stats, setStats] = useState({
@@ -57,6 +60,9 @@ export function ReviewTab() {
   // Daily quiz state
   const isDailyQuizRef = useRef(false);
   const [dailyQuizResult, setDailyQuizResult] = useState<{ score: number; total: number } | null>(null);
+
+  // Endless bank-quiz session (null while on Daily Quiz or in menu)
+  const bankSessionRef = useRef<BankQuizSession | null>(null);
 
   // Daily word / sentence state
   const [dailyWord, setDailyWord] = useState<Word | null>(null);
@@ -89,26 +95,36 @@ export function ReviewTab() {
   };
 
   const startQuiz = async (type: QuizType | "mixed") => {
-    const q = await generateQuiz(type, 10);
-    if (q.length === 0) return;
+    const session = await createBankQuizSession(type);
+    const first = await session.next();
+    if (!first) return;
+    bankSessionRef.current = session;
     isDailyQuizRef.current = false;
-    setQuestions(q);
+    setQuestions([first]);
     setResults([]);
+    setQuizMode("endless");
     setQuizState("playing");
   };
 
   const startDailyQuiz = async () => {
     const q = await generateDailyQuiz();
     if (q.length === 0) return;
+    bankSessionRef.current = null;
     isDailyQuizRef.current = true;
     setQuestions(q);
     setResults([]);
+    setQuizMode("fixed");
     setQuizState("playing");
   };
+
+  const getNextEndless = useCallback(async () => {
+    return bankSessionRef.current?.next() ?? null;
+  }, []);
 
   const handleFinish = async (r: QuizResult[]) => {
     setResults(r);
     setQuizState("results");
+    bankSessionRef.current = null;
 
     if (isDailyQuizRef.current) {
       isDailyQuizRef.current = false;
@@ -124,13 +140,16 @@ export function ReviewTab() {
 
   const handleRetryMistakes = (mistakes: QuizResult[]) => {
     if (mistakes.length === 0) return;
+    bankSessionRef.current = null;
     setQuestions(mistakes.map((m) => m.question));
     setResults([]);
+    setQuizMode("fixed");
     setQuizState("playing");
   };
 
   const backToMenu = () => {
     isDailyQuizRef.current = false;
+    bankSessionRef.current = null;
     setQuizState("menu");
     loadStats();
   };
@@ -158,7 +177,13 @@ export function ReviewTab() {
 
   if (quizState === "playing" && questions.length > 0) {
     return (
-      <QuizRunner questions={questions} onFinish={handleFinish} onExit={backToMenu} />
+      <QuizRunner
+        questions={questions}
+        onFinish={handleFinish}
+        onExit={backToMenu}
+        mode={quizMode}
+        getNext={quizMode === "endless" ? getNextEndless : undefined}
+      />
     );
   }
 
@@ -346,9 +371,14 @@ export function ReviewTab() {
           )}
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {allCaughtUp ? "Study anyway" : "Quiz mode"}
-            </p>
+            <div className="flex items-end justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {allCaughtUp ? "Study anyway" : "Quiz mode"}
+              </p>
+              <span className="text-[11px] text-muted-foreground">
+                Endless · end anytime
+              </span>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               {(
                 [

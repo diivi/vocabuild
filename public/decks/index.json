@@ -88,7 +88,8 @@
       "emoji": "🗺️",
       "source": "Oxford Dictionary of Foreign Words and Phrases",
       "difficulty": "advanced",
-      "file": "foreign-phrases.md"
+      "file": "foreign-phrases.md",
+      "kind": "phrases"
     },
     {
       "id": "phrasal-verbs",
@@ -98,7 +99,19 @@
       "emoji": "💬",
       "source": "Cambridge Phrasal Verbs Dictionary",
       "difficulty": "beginner",
-      "file": "phrasal-verbs.md"
+      "file": "phrasal-verbs.md",
+      "kind": "phrases"
+    },
+    {
+      "id": "english-idioms",
+      "title": "English Idioms",
+      "description": "Common English idioms and expressions — figurative phrases native speakers use every day.",
+      "category": "Idioms",
+      "emoji": "🗣️",
+      "source": "Merriam-Webster, Cambridge Idioms Dictionary",
+      "difficulty": "intermediate",
+      "file": "english-idioms.md",
+      "kind": "phrases"
     },
     {
       "id": "literary",

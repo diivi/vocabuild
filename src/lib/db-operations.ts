@@ -145,6 +145,69 @@ export async function saveWord(
     aiMnemonic: existing?.aiMnemonic,
     aiSentences: existing?.aiSentences,
     inBank: resolvedInBank,
+    isPhrase: existing?.isPhrase ?? 0,
+  };
+
+  if (existing?.id) {
+    await db.words.update(existing.id, wordData);
+    return existing.id;
+  }
+  return (await db.words.add(wordData as Word)) as number;
+}
+
+export interface SavePhraseOptions {
+  inBank?: boolean;
+}
+
+/**
+ * Save a phrase deck entry directly to the words table without hitting the
+ * dictionary API. Phrase rows carry a baked-in definition and have no
+ * phonetics, synonyms, or antonyms.
+ */
+export async function savePhrase(
+  text: string,
+  definition: string,
+  example: string | undefined,
+  options: SavePhraseOptions = {}
+): Promise<number> {
+  const normalized = text.toLowerCase().trim();
+  const existing = await db.words.where("word").equals(normalized).first();
+
+  const resolvedInBank: 0 | 1 =
+    options.inBank === undefined
+      ? (existing?.inBank ?? 0)
+      : options.inBank
+        ? 1
+        : existing?.inBank ?? 0;
+
+  const meanings = [
+    {
+      partOfSpeech: "phrase",
+      definitions: [{ definition, example, synonyms: [], antonyms: [] }],
+      synonyms: [],
+      antonyms: [],
+    },
+  ];
+
+  const wordData: Omit<Word, "id"> = {
+    word: normalized,
+    phonetics: [],
+    meanings,
+    sourceUrls: [],
+    searchedAt: existing?.searchedAt ?? new Date(),
+    reviewCount: existing?.reviewCount ?? 0,
+    lastReviewedAt: existing?.lastReviewedAt,
+    correctCount: existing?.correctCount ?? 0,
+    incorrectCount: existing?.incorrectCount ?? 0,
+    allSynonyms: [],
+    allAntonyms: [],
+    allExamples: example ? [example] : [],
+    primaryDefinition: definition,
+    primaryPartOfSpeech: "phrase",
+    aiMnemonic: existing?.aiMnemonic,
+    aiSentences: existing?.aiSentences,
+    inBank: resolvedInBank,
+    isPhrase: 1,
   };
 
   if (existing?.id) {
